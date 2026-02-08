@@ -1,0 +1,1 @@
+const t="/assets/auth-v2-register-illustration-bordered-dark.5ce43ffc.png",s="/assets/auth-v2-register-illustration-bordered-light.dadca3a7.png",a="/assets/auth-v2-register-illustration-dark.d5566deb.png",r="/assets/auth-v2-register-illustration-light.9baa85be.png";export{t as a,s as b,a as c,r as d};
