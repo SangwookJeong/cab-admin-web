@@ -1,9 +1,18 @@
-import appAndPages from './app-and-pages'
-import charts from './charts'
-import dashboard from './dashboard'
-import forms from './forms'
-import others from './others'
-import uiElements from './ui-elements'
-
-//export default [...dashboard, ...appAndPages, ...uiElements, ...forms, ...charts, ...others]
-export default [...appAndPages, ...uiElements, ...forms, ...charts, ...others]
+export default [
+  {
+    title: 'User',
+    icon: { icon: 'mdi-account-outline' },
+    children: [
+      { title: 'List', to: 'apps-user-list' },
+      { title: 'View', to: { name: 'apps-user-view-id', params: { id: 21 } } },
+    ],
+  },
+  {
+    title: '캘린더',
+    icon: { icon: 'mdi-calendar-blank-outline' },
+    children: [
+      { title: '통합 캘린더', to: 'apps-calendar' },
+      { title: '회의실 현황판', to: 'apps-room-display' },
+    ],
+  },
+]

@@ -18,7 +18,7 @@ const i18nCompLanguages = [
     i18nLang: 'ar',
   },
   {
-    label: 'Korean',
+    label: '한국어',
     i18nLang: 'ko',
   },
 ]

@@ -2,8 +2,11 @@ import dayGridPlugin from '@fullcalendar/daygrid'
 import interactionPlugin from '@fullcalendar/interaction'
 import listPlugin from '@fullcalendar/list'
 import timeGridPlugin from '@fullcalendar/timegrid'
+import koLocale from '@fullcalendar/core/locales/ko'
 import { useThemeConfig } from '@core/composable/useThemeConfig'
 import { useCalendarStore } from '@/views/apps/calendar/useCalendarStore'
+import { useRoomReservationStore } from '@/views/apps/room-reservation/useRoomReservationStore'
+import { useVehicleReservationStore } from '@/views/apps/vehicle-reservation/useVehicleReservationStore'
 
 export const blankEvent = {
   title: '',
@@ -12,161 +15,227 @@ export const blankEvent = {
   allDay: false,
   url: '',
   extendedProps: {
-    /*
-          ℹ️ We have to use undefined here because if we have blank string as value then select placeholder will be active (moved to top).
-          Hence, we need to set it to undefined or null
-        */
     calendar: undefined,
     guests: [],
     location: '',
     description: '',
   },
 }
-export const useCalendar = (event, isEventHandlerSidebarActive, isLeftSidebarOpen) => {
-  // 👉 themeConfig
+
+export const blankRoomEvent = {
+  title: '',
+  start: '',
+  end: '',
+  allDay: false,
+  extendedProps: {
+    resourceType: 'room',
+    resourceId: undefined,
+    booker: '',
+    description: '',
+    attendees: [],
+  },
+}
+
+export const blankVehicleEvent = {
+  title: '',
+  start: '',
+  end: '',
+  allDay: false,
+  extendedProps: {
+    resourceType: 'vehicle',
+    resourceId: undefined,
+    booker: '',
+    destination: '',
+    description: '',
+  },
+}
+
+export const useCalendar = (isLeftSidebarOpen) => {
   const { isAppRtl } = useThemeConfig()
 
-  // 👉 Store
-  const store = useCalendarStore()
+  // Stores
+  const calendarStore = useCalendarStore()
+  const roomStore = useRoomReservationStore()
+  const vehicleStore = useVehicleReservationStore()
 
-  // 👉 Calendar template ref
   const refCalendar = ref()
+  const calendarApi = ref(null)
+  const conflictError = ref('')
 
+  // Event refs for each type
+  const calendarEvent = ref(structuredClone(blankEvent))
+  const roomEvent = ref(structuredClone(blankRoomEvent))
+  const vehicleEvent = ref(structuredClone(blankVehicleEvent))
 
-  // 👉 Calendar colors
+  // Handler active states
+  const isCalendarHandlerActive = ref(false)
+  const isRoomHandlerActive = ref(false)
+  const isVehicleHandlerActive = ref(false)
+
+  // Reset events when handlers close
+  watch(isCalendarHandlerActive, val => {
+    if (!val) calendarEvent.value = structuredClone(blankEvent)
+  })
+  watch(isRoomHandlerActive, val => {
+    if (!val) roomEvent.value = structuredClone(blankRoomEvent)
+  })
+  watch(isVehicleHandlerActive, val => {
+    if (!val) vehicleEvent.value = structuredClone(blankVehicleEvent)
+  })
+
+  // Calendar colors for regular events
   const calendarsColor = {
-    Business: 'primary',
-    Holiday: 'success',
-    Personal: 'error',
-    Family: 'warning',
-    ETC: 'info',
+    '업무': 'primary',
+    '휴일': 'success',
+    '개인': 'error',
+    '가족': 'warning',
+    '기타': 'info',
   }
 
+  // Helpers
+  const getRoomInfo = resourceId => roomStore.rooms.find(r => r.id === resourceId)
+  const getVehicleInfo = resourceId => vehicleStore.vehicles.find(v => v.id === resourceId)
 
-  // ℹ️ Extract event data from event API
-  const extractEventDataFromEventApi = eventApi => {
-    const { id, title, start, end, url, extendedProps: { calendar, guests, location, description }, allDay } = eventApi
-    
-    return {
-      id,
-      title,
-      start,
-      end,
-      url,
-      extendedProps: {
-        calendar,
-        guests,
-        location,
-        description,
-      },
-      allDay,
+  const getEventType = eventApi => {
+    const rt = eventApi.extendedProps?.resourceType || eventApi._def?.extendedProps?.resourceType
+
+    if (rt === 'room') return 'room'
+    if (rt === 'vehicle') return 'vehicle'
+
+    return 'calendar'
+  }
+
+  // Extract event data based on type
+  const extractEventData = (eventApi, type) => {
+    const { id, title, start, end, allDay } = eventApi
+
+    if (type === 'room') {
+      const { resourceType, resourceId, booker, description, attendees } = eventApi.extendedProps
+
+      return { id, title, start, end, allDay, extendedProps: { resourceType, resourceId, booker, description, attendees: attendees || [] } }
     }
+
+    if (type === 'vehicle') {
+      const { resourceType, resourceId, booker, destination, description } = eventApi.extendedProps
+
+      return { id, title, start, end, allDay, extendedProps: { resourceType, resourceId, booker, destination, description } }
+    }
+
+    const { calendar, guests, location, description } = eventApi.extendedProps
+
+    return { id, title, start, end, url: eventApi.url || '', allDay, extendedProps: { calendar, guests: guests || [], location, description } }
   }
 
-
-  // 👉 Fetch events
+  // Fetch events from all sources
   const fetchEvents = (info, successCallback) => {
-    // If there's no info => Don't make useless API call
     if (!info)
       return
-    store.fetchEvents()
-      .then(r => {
-        successCallback(r.data.map(e => ({
-          ...e,
 
-          // Convert string representation of date to Date object
-          start: new Date(e.start),
-          end: new Date(e.end),
-        })))
-      })
-      .catch(e => {
-        console.error('Error occurred while fetching calendar events', e)
-      })
+    const promises = []
+
+    if (calendarStore.selectedCalendars.length > 0)
+      promises.push(calendarStore.fetchEvents().then(r => r.data).catch(() => []))
+    else
+      promises.push(Promise.resolve([]))
+
+    if (roomStore.selectedRoomIds.length > 0)
+      promises.push(roomStore.fetchEvents().then(r => r.data).catch(() => []))
+    else
+      promises.push(Promise.resolve([]))
+
+    if (vehicleStore.selectedVehicleIds.length > 0)
+      promises.push(vehicleStore.fetchEvents().then(r => r.data).catch(() => []))
+    else
+      promises.push(Promise.resolve([]))
+
+    Promise.all(promises).then(results => {
+      const allEvents = results.flat().map(e => ({
+        ...e,
+        start: new Date(e.start),
+        end: new Date(e.end),
+      }))
+
+      successCallback(allEvents)
+    })
   }
 
-
-  // 👉 Calendar API
-  const calendarApi = ref(null)
-
-
-  // 👉 Update event in calendar [UI]
-  const updateEventInCalendar = (updatedEventData, propsToUpdate, extendedPropsToUpdate) => {
-    const existingEvent = calendarApi.value?.getEventById(updatedEventData.id)
-    if (!existingEvent) {
-      console.warn('Can\'t found event in calendar to update')
-      
-      return
-    }
-
-    // ---Set event properties except date related
-    // Docs: https://fullcalendar.io/docs/Event-setProp
-    // dateRelatedProps => ['start', 'end', 'allDay']
-    for (let index = 0; index < propsToUpdate.length; index++) {
-      const propName = propsToUpdate[index]
-
-      existingEvent.setProp(propName, updatedEventData[propName])
-    }
-
-    // --- Set date related props
-    // ? Docs: https://fullcalendar.io/docs/Event-setDates
-    existingEvent.setDates(updatedEventData.start, updatedEventData.end, { allDay: updatedEventData.allDay })
-
-    // --- Set event's extendedProps
-    // ? Docs: https://fullcalendar.io/docs/Event-setExtendedProp
-    for (let index = 0; index < extendedPropsToUpdate.length; index++) {
-      const propName = extendedPropsToUpdate[index]
-
-      existingEvent.setExtendedProp(propName, updatedEventData.extendedProps[propName])
-    }
-  }
-
-
-  // 👉 Remove event in calendar [UI]
-  const removeEventInCalendar = eventId => {
-    const _event = calendarApi.value?.getEventById(eventId)
-    if (_event)
-      _event.remove()
-  }
-
-
-  // 👉 refetch events
   const refetchEvents = () => {
     calendarApi.value?.refetchEvents()
   }
 
-  watch(() => store.selectedCalendars, refetchEvents)
+  // Watch for filter changes
+  watch(() => calendarStore.selectedCalendars, refetchEvents)
+  watch(() => roomStore.selectedRoomIds, refetchEvents)
+  watch(() => vehicleStore.selectedVehicleIds, refetchEvents)
 
+  // Add/Update/Remove — Calendar
+  const addCalendarEvent = _event => {
+    calendarStore.addEvent(_event).then(() => refetchEvents())
+  }
 
-  // 👉 Add event
-  const addEvent = _event => {
-    store.addEvent(_event)
-      .then(() => {
-        refetchEvents()
+  const updateCalendarEvent = _event => {
+    calendarStore.updateEvent(_event).then(() => refetchEvents())
+  }
+
+  const removeCalendarEvent = eventId => {
+    calendarStore.removeEvent(eventId).then(() => refetchEvents())
+  }
+
+  // Add/Update/Remove — Room
+  const addRoomEvent = _event => {
+    conflictError.value = ''
+    roomStore.addEvent(_event)
+      .then(() => refetchEvents())
+      .catch(err => {
+        if (err.response?.status === 409)
+          conflictError.value = err.response.data.message || '해당 시간에 이미 예약이 있습니다.'
       })
   }
 
-
-  // 👉 Update event
-  const updateEvent = _event => {
-    store.updateEvent(_event)
-      .then(r => {
-        const propsToUpdate = ['id', 'title', 'url']
-        const extendedPropsToUpdate = ['calendar', 'guests', 'location', 'description']
-
-        updateEventInCalendar(r.data.event, propsToUpdate, extendedPropsToUpdate)
+  const updateRoomEvent = _event => {
+    conflictError.value = ''
+    roomStore.updateEvent(_event)
+      .then(() => refetchEvents())
+      .catch(err => {
+        if (err.response?.status === 409) {
+          conflictError.value = err.response.data.message || '해당 시간에 이미 예약이 있습니다.'
+          refetchEvents()
+        }
       })
   }
 
-
-  // 👉 Remove event
-  const removeEvent = eventId => {
-    store.removeEvent(eventId).then(() => {
-      removeEventInCalendar(eventId)
-    })
+  const removeRoomEvent = eventId => {
+    roomStore.removeEvent(eventId).then(() => refetchEvents())
   }
 
+  // Add/Update/Remove — Vehicle
+  const addVehicleEvent = _event => {
+    conflictError.value = ''
+    vehicleStore.addEvent(_event)
+      .then(() => refetchEvents())
+      .catch(err => {
+        if (err.response?.status === 409)
+          conflictError.value = err.response.data.message || '해당 시간에 이미 예약이 있습니다.'
+      })
+  }
 
-  // 👉 Calendar options
+  const updateVehicleEvent = _event => {
+    conflictError.value = ''
+    vehicleStore.updateEvent(_event)
+      .then(() => refetchEvents())
+      .catch(err => {
+        if (err.response?.status === 409) {
+          conflictError.value = err.response.data.message || '해당 시간에 이미 예약이 있습니다.'
+          refetchEvents()
+        }
+      })
+  }
+
+  const removeVehicleEvent = eventId => {
+    vehicleStore.removeEvent(eventId).then(() => refetchEvents())
+  }
+
+  // Calendar options
   const calendarOptions = {
     plugins: [dayGridPlugin, interactionPlugin, timeGridPlugin, listPlugin],
     initialView: 'dayGridMonth',
@@ -175,77 +244,92 @@ export const useCalendar = (event, isEventHandlerSidebarActive, isLeftSidebarOpe
       end: 'dayGridMonth,timeGridWeek,timeGridDay,listMonth',
     },
     events: fetchEvents,
-
-    // ❗ We need this to be true because when its false and event is allDay event and end date is same as start data then Full calendar will set end to null
     forceEventDuration: true,
-
-    /*
-        Enable dragging and resizing event
-        Docs: https://fullcalendar.io/docs/editable
-      */
     editable: true,
-
-    /*
-        Enable resizing event from start
-        Docs: https://fullcalendar.io/docs/eventResizableFromStart
-      */
     eventResizableFromStart: true,
-
-    /*
-        Automatically scroll the scroll-containers during event drag-and-drop and date selecting
-        Docs: https://fullcalendar.io/docs/dragScroll
-      */
     dragScroll: true,
-
-    /*
-        Max number of events within a given day
-        Docs: https://fullcalendar.io/docs/dayMaxEvents
-      */
     dayMaxEvents: 2,
-
-    /*
-        Determines if day names and week names are clickable
-        Docs: https://fullcalendar.io/docs/navLinks
-      */
     navLinks: true,
+    locale: koLocale,
+
     eventClassNames({ event: calendarEvent }) {
-      const colorName = calendarsColor[calendarEvent._def.extendedProps.calendar]
-      
-      return [
-        // Background Color
-        `bg-light-${colorName} text-${colorName}`,
-      ]
+      const ep = calendarEvent._def.extendedProps
+
+      if (ep.resourceType === 'room') {
+        const room = getRoomInfo(ep.resourceId)
+
+        return [`bg-light-${room?.color || 'primary'} text-${room?.color || 'primary'}`]
+      }
+      if (ep.resourceType === 'vehicle') {
+        const vehicle = getVehicleInfo(ep.resourceId)
+
+        return [`bg-light-${vehicle?.color || 'primary'} text-${vehicle?.color || 'primary'}`]
+      }
+      const colorName = calendarsColor[ep.calendar] || 'primary'
+
+      return [`bg-light-${colorName} text-${colorName}`]
     },
+
+    eventContent(arg) {
+      const ep = arg.event._def.extendedProps
+
+      if (ep.resourceType === 'room') {
+        const room = getRoomInfo(ep.resourceId)
+
+        return { html: `<div class="fc-event-main-frame" style="padding:2px 4px"><div class="fc-event-title-container"><div class="fc-event-title fc-sticky">[${room?.name || ''}] ${arg.event.title}</div></div></div>` }
+      }
+      if (ep.resourceType === 'vehicle') {
+        const vehicle = getVehicleInfo(ep.resourceId)
+
+        return { html: `<div class="fc-event-main-frame" style="padding:2px 4px"><div class="fc-event-title-container"><div class="fc-event-title fc-sticky">[${vehicle?.name || ''}] ${arg.event.title}</div></div></div>` }
+      }
+
+      // Regular calendar events — default rendering
+      return null
+    },
+
     eventClick({ event: clickedEvent }) {
-      // * Only grab required field otherwise it goes in infinity loop
-      // ! Always grab all fields rendered by form (even if it get `undefined`) otherwise due to Vue3/Composition API you might get: "object is not extensible"
-      event.value = extractEventDataFromEventApi(clickedEvent)
-      isEventHandlerSidebarActive.value = true
+      const type = getEventType(clickedEvent)
+
+      if (type === 'room') {
+        roomEvent.value = extractEventData(clickedEvent, 'room')
+        isRoomHandlerActive.value = true
+      }
+      else if (type === 'vehicle') {
+        vehicleEvent.value = extractEventData(clickedEvent, 'vehicle')
+        isVehicleHandlerActive.value = true
+      }
+      else {
+        calendarEvent.value = extractEventData(clickedEvent, 'calendar')
+        isCalendarHandlerActive.value = true
+      }
     },
 
-    // customButtons
     dateClick(info) {
-      event.value = { ...event.value, start: String(new Date(info.date)) }
-      isEventHandlerSidebarActive.value = true
+      calendarEvent.value = { ...calendarEvent.value, start: String(new Date(info.date)) }
+      isCalendarHandlerActive.value = true
     },
 
-    /*
-          Handle event drop (Also include dragged event)
-          Docs: https://fullcalendar.io/docs/eventDrop
-          We can use `eventDragStop` but it doesn't return updated event so we have to use `eventDrop` which returns updated event
-        */
     eventDrop({ event: droppedEvent }) {
-      updateEvent(extractEventDataFromEventApi(droppedEvent))
+      const type = getEventType(droppedEvent)
+      const eventData = extractEventData(droppedEvent, type)
+
+      if (type === 'room') updateRoomEvent(eventData)
+      else if (type === 'vehicle') updateVehicleEvent(eventData)
+      else updateCalendarEvent(eventData)
     },
 
-    /*
-          Handle event resize
-          Docs: https://fullcalendar.io/docs/eventResize
-        */
     eventResize({ event: resizedEvent }) {
-      if (resizedEvent.start && resizedEvent.end)
-        updateEvent(extractEventDataFromEventApi(resizedEvent))
+      if (resizedEvent.start && resizedEvent.end) {
+        const type = getEventType(resizedEvent)
+        const eventData = extractEventData(resizedEvent, type)
+
+        if (type === 'room') updateRoomEvent(eventData)
+        else if (type === 'vehicle') updateVehicleEvent(eventData)
+        else updateCalendarEvent(eventData)
+      }
     },
+
     customButtons: {
       drawerToggler: {
         text: 'calendarDrawerToggler',
@@ -256,22 +340,33 @@ export const useCalendar = (event, isEventHandlerSidebarActive, isLeftSidebarOpe
     },
   }
 
-
-  // 👉 onMounted
   onMounted(() => {
     calendarApi.value = refCalendar.value.getApi()
   })
+
   watch(isAppRtl, val => {
     calendarApi.value?.setOption('direction', val ? 'rtl' : 'ltr')
   }, { immediate: true })
-  
+
   return {
     refCalendar,
     calendarOptions,
     refetchEvents,
-    fetchEvents,
-    addEvent,
-    updateEvent,
-    removeEvent,
+    calendarEvent,
+    roomEvent,
+    vehicleEvent,
+    isCalendarHandlerActive,
+    isRoomHandlerActive,
+    isVehicleHandlerActive,
+    conflictError,
+    addCalendarEvent,
+    updateCalendarEvent,
+    removeCalendarEvent,
+    addRoomEvent,
+    updateRoomEvent,
+    removeRoomEvent,
+    addVehicleEvent,
+    updateVehicleEvent,
+    removeVehicleEvent,
   }
 }

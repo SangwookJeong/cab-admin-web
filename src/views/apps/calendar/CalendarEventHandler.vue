@@ -1,5 +1,4 @@
 <script setup>
-import { PerfectScrollbar } from 'vue3-perfect-scrollbar'
 import { VForm } from 'vuetify/components'
 import { useCalendarStore } from './useCalendarStore'
 import avatar1 from '@images/avatars/avatar-1.png'
@@ -118,7 +117,7 @@ const startDateTimePickerConfig = computed(() => {
 
   if (event.value.end)
     config.maxDate = event.value.end
-  
+
   return config
 })
 
@@ -130,184 +129,193 @@ const endDateTimePickerConfig = computed(() => {
 
   if (event.value.start)
     config.minDate = event.value.start
-  
+
   return config
 })
 </script>
 
 <template>
-  <VNavigationDrawer
-    temporary
-    location="end"
+  <VDialog
     :model-value="props.isDrawerOpen"
-    width="420"
-    class="scrollable-content"
+    max-width="700"
+    persistent
+    content-class="dialog-top"
     @update:model-value="(val) => $emit('update:isDrawerOpen', val)"
   >
-    <!-- 👉 Header -->
-    <div class="px-5 py-3 d-flex align-center bg-var-theme-background">
-      <h3 class="font-weight-medium text-xl">
-        {{ event.id ? 'Update' : 'Add' }} Event
-      </h3>
-      <VSpacer />
-      <VBtn
-        v-show="event.id"
-        icon
-        variant="text"
-        size="small"
-        color="default"
-        @click="removeEvent"
-      >
-        <VIcon icon="mdi-trash-can-outline" />
-      </VBtn>
-      <VBtn
-        variant="text"
-        color="default"
-        icon
-        size="small"
-        @click="$emit('update:isDrawerOpen', false)"
-      >
-        <VIcon icon="mdi-close" />
-      </VBTn>
-    </div>
+    <VCard>
+      <!-- 👉 Header -->
+      <VCardTitle class="d-flex align-center pa-4">
+        <span class="text-h6">
+          {{ event.id ? '일정 수정' : '일정 추가' }}
+        </span>
+        <VSpacer />
+        <VBtn
+          v-show="event.id"
+          icon
+          variant="text"
+          size="small"
+          color="default"
+          @click="removeEvent"
+        >
+          <VIcon icon="mdi-trash-can-outline" />
+        </VBtn>
+        <VBtn
+          variant="text"
+          color="default"
+          icon
+          size="small"
+          @click="$emit('update:isDrawerOpen', false)"
+        >
+          <VIcon icon="mdi-close" />
+        </VBtn>
+      </VCardTitle>
 
-    <PerfectScrollbar :options="{ wheelPropagation: false }">
-      <VCard flat>
-        <VCardText>
-          <!-- SECTION Form -->
-          <VForm
-            ref="refForm"
-            @submit.prevent="handleSubmit"
-          >
-            <VRow>
-              <!-- 👉 Title -->
-              <VCol cols="12">
-                <VTextField
-                  v-model="event.title"
-                  label="Title"
-                  :rules="[requiredValidator]"
-                />
-              </VCol>
+      <VDivider />
 
-              <!-- 👉 Calendar -->
-              <VCol cols="12">
-                <VSelect
-                  v-model="event.extendedProps.calendar"
-                  label="Calendar"
-                  :rules="[requiredValidator]"
-                  :items="store.availableCalendars"
-                  :item-title="item => item.label"
-                  :item-value="item => item.label"
-                >
-                  <template #selection="{ item }">
-                    <div
-                      v-show="event.extendedProps.calendar"
-                      class="align-center"
-                      :class="event.extendedProps.calendar ? 'd-flex' : ''"
-                    >
-                      <VBadge
-                        :color="item.raw.color"
-                        inline
-                        dot
-                        class="pa-1"
-                      />
-                      <span>{{ item.raw.label }}</span>
-                    </div>
-                  </template>
-                </VSelect>
-              </VCol>
+      <VCardText>
+        <!-- SECTION Form -->
+        <VForm
+          ref="refForm"
+          @submit.prevent="handleSubmit"
+        >
+          <VRow>
+            <!-- 👉 Title -->
+            <VCol
+              cols="12"
+              md="8"
+            >
+              <VTextField
+                v-model="event.title"
+                label="제목"
+                :rules="[requiredValidator]"
+              />
+            </VCol>
 
-              <!-- 👉 Start date -->
-              <VCol cols="12">
-                <AppDateTimePicker
-                  :key="JSON.stringify(startDateTimePickerConfig)"
-                  v-model="event.start"
-                  :rules="[requiredValidator]"
-                  label="Start date"
-                  :config="startDateTimePickerConfig"
-                />
-              </VCol>
+            <!-- 👉 Calendar -->
+            <VCol
+              cols="12"
+              md="4"
+            >
+              <VSelect
+                v-model="event.extendedProps.calendar"
+                label="카테고리"
+                :rules="[requiredValidator]"
+                :items="store.availableCalendars"
+                :item-title="item => item.label"
+                :item-value="item => item.label"
+              >
+                <template #selection="{ item }">
+                  <div
+                    v-show="event.extendedProps.calendar"
+                    class="align-center"
+                    :class="event.extendedProps.calendar ? 'd-flex' : ''"
+                  >
+                    <VBadge
+                      :color="item.raw.color"
+                      inline
+                      dot
+                      class="pa-1"
+                    />
+                    <span>{{ item.raw.label }}</span>
+                  </div>
+                </template>
+              </VSelect>
+            </VCol>
 
-              <!-- 👉 End date -->
-              <VCol cols="12">
-                <AppDateTimePicker
-                  :key="JSON.stringify(endDateTimePickerConfig)"
-                  v-model="event.end"
-                  :rules="[requiredValidator]"
-                  label="End date"
-                  :config="endDateTimePickerConfig"
-                />
-              </VCol>
+            <!-- 👉 Start date -->
+            <VCol
+              cols="12"
+              md="6"
+            >
+              <AppDateTimePicker
+                :key="JSON.stringify(startDateTimePickerConfig)"
+                v-model="event.start"
+                :rules="[requiredValidator]"
+                label="시작일시"
+                :config="startDateTimePickerConfig"
+              />
+            </VCol>
 
-              <!-- 👉 All day -->
-              <VCol cols="12">
-                <VSwitch
-                  v-model="event.allDay"
-                  label="All day"
-                />
-              </VCol>
+            <!-- 👉 End date -->
+            <VCol
+              cols="12"
+              md="6"
+            >
+              <AppDateTimePicker
+                :key="JSON.stringify(endDateTimePickerConfig)"
+                v-model="event.end"
+                :rules="[requiredValidator]"
+                label="종료일시"
+                :config="endDateTimePickerConfig"
+              />
+            </VCol>
 
-              <!-- 👉 Event URL -->
-              <VCol cols="12">
-                <VTextField
-                  v-model="event.url"
-                  label="Event URL"
-                  :rules="[urlValidator]"
-                  type="url"
-                />
-              </VCol>
+            <!-- 👉 Event URL -->
+            <VCol
+              cols="12"
+              md="6"
+            >
+              <VTextField
+                v-model="event.url"
+                label="URL"
+                :rules="[urlValidator]"
+                type="url"
+              />
+            </VCol>
 
-              <!-- 👉 Guests -->
-              <VCol cols="12">
-                <VSelect
-                  v-model="event.extendedProps.guests"
-                  label="Guests"
-                  :items="guestsOptions"
-                  :item-title="item => item.name"
-                  :item-value="item => item.name"
-                  chips
-                  multiple
-                  eager
-                />
-              </VCol>
+            <!-- 👉 Location -->
+            <VCol
+              cols="12"
+              md="6"
+            >
+              <VTextField
+                v-model="event.extendedProps.location"
+                label="장소"
+              />
+            </VCol>
 
-              <!-- 👉 Location -->
-              <VCol cols="12">
-                <VTextField
-                  v-model="event.extendedProps.location"
-                  label="Location"
-                />
-              </VCol>
+            <!-- 👉 Guests -->
+            <VCol cols="12">
+              <VSelect
+                v-model="event.extendedProps.guests"
+                label="참석자"
+                :items="guestsOptions"
+                :item-title="item => item.name"
+                :item-value="item => item.name"
+                chips
+                multiple
+                eager
+              />
+            </VCol>
 
-              <!-- 👉 Description -->
-              <VCol cols="12">
-                <VTextarea
-                  v-model="event.extendedProps.description"
-                  label="Description"
-                />
-              </VCol>
+            <!-- 👉 Description -->
+            <VCol cols="12">
+              <VTextField
+                v-model="event.extendedProps.description"
+                label="설명"
+              />
+            </VCol>
 
-              <!-- 👉 Form buttons -->
-              <VCol cols="12">
-                <VBtn
-                  type="submit"
-                  class="me-3"
-                >
-                  Submit
-                </VBtn>
-                <VBtn
-                  variant="tonal"
-                  color="secondary"
-                  @click="onCancel"
-                >
-                  Cancel
-                </VBtn>
-              </VCol>
-            </VRow>
-          </VForm>
+            <!-- 👉 Form buttons -->
+            <VCol cols="12">
+              <VBtn
+                type="submit"
+                class="me-3"
+              >
+                저장
+              </VBtn>
+              <VBtn
+                variant="tonal"
+                color="secondary"
+                @click="onCancel"
+              >
+                취소
+              </VBtn>
+            </VCol>
+          </VRow>
+        </VForm>
         <!-- !SECTION -->
-        </VCardText>
-      </VCard>
-    </PerfectScrollbar>
-  </VNavigationDrawer>
+      </VCardText>
+    </VCard>
+  </VDialog>
 </template>

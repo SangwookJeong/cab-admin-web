@@ -1,120 +1,120 @@
 import mock from '@/@fake-db/mock'
 
 const date = new Date()
-const nextDay = new Date(new Date().getTime() + 24 * 60 * 60 * 1000)
-const nextMonth = date.getMonth() === 11 ? new Date(date.getFullYear() + 1, 0, 1) : new Date(date.getFullYear(), date.getMonth() + 1, 1)
-const prevMonth = date.getMonth() === 11 ? new Date(date.getFullYear() - 1, 0, 1) : new Date(date.getFullYear(), date.getMonth() - 1, 1)
+const y = date.getFullYear()
+const m = date.getMonth()
+const d = date.getDate()
 
 const data = {
   events: [
     {
       id: '1',
       url: '',
-      title: 'Design Review',
-      start: date.toUTCString(),
-      end: nextDay.toUTCString(),
+      title: '디자인 검토',
+      start: new Date(y, m, d, 10, 0).toISOString(),
+      end: new Date(y, m, d, 11, 30).toISOString(),
       allDay: false,
       extendedProps: {
-        calendar: 'Business',
+        calendar: '업무',
       },
     },
     {
       id: '2',
       url: '',
-      title: 'Meeting With Client',
-      start: new Date(date.getFullYear(), date.getMonth() + 1, -11).toUTCString(),
-      end: new Date(date.getFullYear(), date.getMonth() + 1, -10).toUTCString(),
-      allDay: true,
+      title: '고객 미팅',
+      start: new Date(y, m, d + 5, 14, 0).toISOString(),
+      end: new Date(y, m, d + 5, 15, 0).toISOString(),
+      allDay: false,
       extendedProps: {
-        calendar: 'Business',
+        calendar: '업무',
       },
     },
     {
       id: '3',
       url: '',
-      title: 'Family Trip',
-      allDay: true,
-      start: new Date(date.getFullYear(), date.getMonth() + 1, -9).toUTCString(),
-      end: new Date(date.getFullYear(), date.getMonth() + 1, -7).toUTCString(),
+      title: '가족 저녁',
+      start: new Date(y, m, d + 7, 18, 0).toISOString(),
+      end: new Date(y, m, d + 7, 20, 0).toISOString(),
+      allDay: false,
       extendedProps: {
-        calendar: 'Holiday',
+        calendar: '가족',
       },
     },
     {
       id: '4',
       url: '',
-      title: 'Doctor\'s Appointment',
-      start: new Date(date.getFullYear(), date.getMonth() + 1, -11).toUTCString(),
-      end: new Date(date.getFullYear(), date.getMonth() + 1, -10).toUTCString(),
-      allDay: true,
+      title: '병원 예약',
+      start: new Date(y, m, d + 5, 9, 0).toISOString(),
+      end: new Date(y, m, d + 5, 10, 0).toISOString(),
+      allDay: false,
       extendedProps: {
-        calendar: 'Personal',
+        calendar: '개인',
       },
     },
     {
       id: '5',
       url: '',
-      title: 'Dart Game?',
-      start: new Date(date.getFullYear(), date.getMonth() + 1, -13).toUTCString(),
-      end: new Date(date.getFullYear(), date.getMonth() + 1, -12).toUTCString(),
-      allDay: true,
+      title: '다트 게임',
+      start: new Date(y, m, d + 3, 19, 0).toISOString(),
+      end: new Date(y, m, d + 3, 21, 0).toISOString(),
+      allDay: false,
       extendedProps: {
-        calendar: 'ETC',
+        calendar: '기타',
       },
     },
     {
       id: '6',
       url: '',
-      title: 'Meditation',
-      start: new Date(date.getFullYear(), date.getMonth() + 1, -13).toUTCString(),
-      end: new Date(date.getFullYear(), date.getMonth() + 1, -12).toUTCString(),
-      allDay: true,
+      title: '명상',
+      start: new Date(y, m, d + 3, 7, 0).toISOString(),
+      end: new Date(y, m, d + 3, 8, 0).toISOString(),
+      allDay: false,
       extendedProps: {
-        calendar: 'Personal',
+        calendar: '개인',
       },
     },
     {
       id: '7',
       url: '',
-      title: 'Dinner',
-      start: new Date(date.getFullYear(), date.getMonth() + 1, -13).toUTCString(),
-      end: new Date(date.getFullYear(), date.getMonth() + 1, -12).toUTCString(),
-      allDay: true,
+      title: '저녁 식사',
+      start: new Date(y, m, d - 2, 18, 0).toISOString(),
+      end: new Date(y, m, d - 2, 20, 0).toISOString(),
+      allDay: false,
       extendedProps: {
-        calendar: 'Family',
+        calendar: '가족',
       },
     },
     {
       id: '8',
       url: '',
-      title: 'Product Review',
-      start: new Date(date.getFullYear(), date.getMonth() + 1, -13).toUTCString(),
-      end: new Date(date.getFullYear(), date.getMonth() + 1, -12).toUTCString(),
-      allDay: true,
+      title: '제품 검토',
+      start: new Date(y, m, d - 2, 14, 0).toISOString(),
+      end: new Date(y, m, d - 2, 16, 0).toISOString(),
+      allDay: false,
       extendedProps: {
-        calendar: 'Business',
+        calendar: '업무',
       },
     },
     {
       id: '9',
       url: '',
-      title: 'Monthly Meeting',
-      start: nextMonth.toUTCString(),
-      end: nextMonth.toUTCString(),
-      allDay: true,
+      title: '월간 회의',
+      start: new Date(y, m, d + 14, 10, 0).toISOString(),
+      end: new Date(y, m, d + 14, 12, 0).toISOString(),
+      allDay: false,
       extendedProps: {
-        calendar: 'Business',
+        calendar: '업무',
       },
     },
     {
       id: '10',
       url: '',
-      title: 'Monthly Checkup',
-      start: prevMonth.toUTCString(),
-      end: prevMonth.toUTCString(),
-      allDay: true,
+      title: '월간 검진',
+      start: new Date(y, m, d - 10, 9, 0).toISOString(),
+      end: new Date(y, m, d - 10, 10, 0).toISOString(),
+      allDay: false,
       extendedProps: {
-        calendar: 'Personal',
+        calendar: '개인',
       },
     },
   ],
@@ -127,7 +127,7 @@ const data = {
 mock.onGet('/apps/calendar/events').reply(config => {
   // Get requested calendars as Array
   const calendars = config.params.calendars.split(',')
-  
+
   return [200, data.events.filter(event => calendars.includes(event.extendedProps.calendar))]
 })
 
@@ -143,7 +143,7 @@ mock.onPost('/apps/calendar/events').reply(config => {
     lastIndex = Number(data.events[length - 1].id)
   event.id = String(lastIndex + 1)
   data.events.push(event)
-  
+
   return [201, { event }]
 })
 
@@ -155,10 +155,10 @@ mock.onPost(/\/apps\/calendar\/events\/\d+/).reply(config => {
   const event = data.events.find(e => e.id === eventData.id)
   if (event) {
     Object.assign(event, eventData)
-    
+
     return [200, { event }]
   }
-  
+
   return [400, { message: 'Something went wrong' }]
 })
 
@@ -171,6 +171,6 @@ mock.onDelete(/\/apps\/calendar\/events\/\d+/).reply(config => {
   const eventIndex = data.events.findIndex(e => e.id === eventId)
 
   data.events.splice(eventIndex, 1)
-  
+
   return [200]
 })
