@@ -1,9 +1,8 @@
 <script setup>
 import { PerfectScrollbar } from 'vue3-perfect-scrollbar'
-import {
-  emailValidator,
-  requiredValidator,
-} from '@validators'
+import { useUserListStore } from '@/views/apps/user/useUserListStore'
+import { avatarText } from '@core/utils/formatters'
+import { requiredValidator } from '@validators'
 
 const props = defineProps({
   isDrawerOpen: {
@@ -20,14 +19,38 @@ const emit = defineEmits([
 const isFormValid = ref(false)
 const refForm = ref()
 const fullName = ref('')
-const userName = ref('')
-const email = ref('')
-const company = ref('')
-const country = ref('')
-const contact = ref('')
-const role = ref()
-const plan = ref()
-const status = ref()
+const phone = ref('')
+const gender = ref()
+const birthDate = ref('')
+const salvationDate = ref('')
+const address1 = ref('')
+const address2 = ref('')
+const district = ref()
+const zone = ref('')
+const group = ref('')
+const vehicle = ref()
+const family = ref([])
+const memo = ref('')
+const allUsers = ref([])
+
+const userListStore = useUserListStore()
+
+userListStore.fetchAllUsers().then(response => {
+  allUsers.value = response.data.users
+})
+const photoPreview = ref('')
+const refPhotoInput = ref()
+
+const onPhotoUpload = event => {
+  const file = event.target.files[0]
+  if (!file) return
+
+  const reader = new FileReader()
+  reader.onload = e => {
+    photoPreview.value = e.target.result
+  }
+  reader.readAsDataURL(file)
+}
 
 // 👉 drawer close
 const closeNavigationDrawer = () => {
@@ -35,6 +58,7 @@ const closeNavigationDrawer = () => {
   nextTick(() => {
     refForm.value?.reset()
     refForm.value?.resetValidation()
+    family.value = []
   })
 }
 
@@ -44,20 +68,26 @@ const onSubmit = () => {
       emit('userData', {
         id: 0,
         fullName: fullName.value,
-        company: company.value,
-        role: role.value,
-        username: userName.value,
-        country: country.value,
-        contact: contact.value,
-        email: email.value,
-        currentPlan: plan.value,
-        status: status.value,
-        avatar: '',
+        phone: phone.value,
+        gender: gender.value,
+        birthDate: birthDate.value,
+        salvationDate: salvationDate.value,
+        address1: address1.value,
+        address2: address2.value,
+        district: district.value,
+        zone: zone.value,
+        group: group.value,
+        vehicle: vehicle.value,
+        family: family.value,
+        memo: memo.value,
+        photo: photoPreview.value,
       })
       emit('update:isDrawerOpen', false)
       nextTick(() => {
         refForm.value?.reset()
         refForm.value?.resetValidation()
+        photoPreview.value = ''
+        family.value = []
       })
     }
   })
@@ -80,7 +110,7 @@ const handleDrawerModelValueUpdate = val => {
     <!-- 👉 Title -->
     <div class="d-flex align-center bg-var-theme-background px-5 py-2">
       <h6 class="text-h6">
-        Add User
+        성도 등록
       </h6>
 
       <VSpacer />
@@ -104,98 +134,206 @@ const handleDrawerModelValueUpdate = val => {
             @submit.prevent="onSubmit"
           >
             <VRow>
-              <!-- 👉 Full name -->
+              <!-- 👉 사진 업로드 -->
+              <VCol
+                cols="12"
+                class="d-flex justify-center"
+              >
+                <div
+                  class="avatar-upload-wrapper d-inline-block position-relative cursor-pointer"
+                  @click="refPhotoInput?.click()"
+                >
+                  <VAvatar
+                    rounded="sm"
+                    :size="100"
+                    color="primary"
+                    variant="tonal"
+                  >
+                    <VImg
+                      v-if="photoPreview"
+                      :src="photoPreview"
+                    />
+                    <span
+                      v-else-if="fullName"
+                      class="text-3xl font-weight-medium"
+                    >
+                      {{ avatarText(fullName) }}
+                    </span>
+                    <VIcon
+                      v-else
+                      icon="mdi-account-outline"
+                      size="40"
+                    />
+                  </VAvatar>
+
+                  <div class="avatar-upload-overlay d-flex align-center justify-center">
+                    <VIcon
+                      icon="mdi-camera"
+                      color="white"
+                      size="24"
+                    />
+                  </div>
+
+                  <input
+                    ref="refPhotoInput"
+                    type="file"
+                    accept="image/*"
+                    hidden
+                    @change="onPhotoUpload"
+                  >
+                </div>
+              </VCol>
+
+              <!-- 👉 이름 -->
               <VCol cols="12">
                 <VTextField
                   v-model="fullName"
                   :rules="[requiredValidator]"
-                  label="Full Name"
+                  label="이름"
                 />
               </VCol>
 
-              <!-- 👉 Username -->
+              <!-- 👉 전화번호 -->
               <VCol cols="12">
                 <VTextField
-                  v-model="userName"
-                  :rules="[requiredValidator]"
-                  label="Username"
+                  v-model="phone"
+                  label="전화번호"
+                  placeholder="010-0000-0000"
                 />
               </VCol>
 
-              <!-- 👉 Email -->
-              <VCol cols="12">
-                <VTextField
-                  v-model="email"
-                  :rules="[requiredValidator, emailValidator]"
-                  label="Email"
-                />
-              </VCol>
-
-              <!-- 👉 company -->
-              <VCol cols="12">
-                <VTextField
-                  v-model="company"
-                  :rules="[requiredValidator]"
-                  label="Company"
-                />
-              </VCol>
-
-              <!-- 👉 Country -->
-              <VCol cols="12">
-                <VTextField
-                  v-model="country"
-                  :rules="[requiredValidator]"
-                  label="Country"
-                />
-              </VCol>
-
-              <!-- 👉 Contact -->
-              <VCol cols="12">
-                <VTextField
-                  v-model="contact"
-                  type="number"
-                  :rules="[requiredValidator]"
-                  label="Contact"
-                />
-              </VCol>
-
-              <!-- 👉 Role -->
+              <!-- 👉 성별 -->
               <VCol cols="12">
                 <VSelect
-                  v-model="role"
-                  label="Select Role"
-                  :rules="[requiredValidator]"
-                  :items="['Admin', 'Author', 'Editor', 'Maintainer', 'Subscriber']"
+                  v-model="gender"
+                  label="성별"
+                  :items="['남', '여']"
                 />
               </VCol>
 
-              <!-- 👉 Plan -->
+              <!-- 👉 생년월일 -->
+              <VCol cols="12">
+                <VTextField
+                  v-model="birthDate"
+                  label="생년월일"
+                  placeholder="YYYY-MM-DD"
+                />
+              </VCol>
+
+              <!-- 👉 구원일 -->
+              <VCol cols="12">
+                <VTextField
+                  v-model="salvationDate"
+                  label="구원일"
+                  placeholder="YYYY-MM-DD"
+                />
+              </VCol>
+
+              <!-- 👉 주소1 -->
+              <VCol cols="12">
+                <VTextField
+                  v-model="address1"
+                  label="주소1"
+                />
+              </VCol>
+
+              <!-- 👉 주소2 -->
+              <VCol cols="12">
+                <VTextField
+                  v-model="address2"
+                  label="주소2 (상세주소)"
+                />
+              </VCol>
+
+              <!-- 👉 교구 -->
               <VCol cols="12">
                 <VSelect
-                  v-model="plan"
-                  label="Select Plan"
-                  :rules="[requiredValidator]"
-                  :items="['Basic', 'Company', 'Enterprise', 'Team']"
+                  v-model="district"
+                  label="교구"
+                  :items="['1교구', '2교구', '3교구']"
                 />
               </VCol>
 
-              <!-- 👉 Status -->
+              <!-- 👉 구역 -->
+              <VCol cols="12">
+                <VTextField
+                  v-model="zone"
+                  label="구역"
+                  placeholder="예: 1구역"
+                />
+              </VCol>
+
+              <!-- 👉 회 -->
+              <VCol cols="12">
+                <VTextField
+                  v-model="group"
+                  label="회"
+                  placeholder="예: 1회"
+                />
+              </VCol>
+
+              <!-- 👉 차량 -->
               <VCol cols="12">
                 <VSelect
-                  v-model="status"
-                  label="Select Status"
-                  :rules="[requiredValidator]"
-                  :items="[{ title: 'Active', value: 'active' }, { title: 'Inactive', value: 'inactive' }, { title: 'Pending', value: 'pending' }]"
+                  v-model="vehicle"
+                  label="차량"
+                  :items="['있음', '없음']"
                 />
               </VCol>
 
-              <!-- 👉 Submit and Cancel -->
+              <!-- 👉 가족현황 -->
+              <VCol cols="12">
+                <VAutocomplete
+                  v-model="family"
+                  :items="allUsers"
+                  item-title="fullName"
+                  item-value="id"
+                  label="가족현황"
+                  multiple
+                  chips
+                  closable-chips
+                  placeholder="성도를 검색하세요"
+                >
+                  <template #item="{ props: itemProps, item }">
+                    <VListItem v-bind="itemProps">
+                      <template #prepend>
+                        <VAvatar
+                          size="32"
+                          color="primary"
+                          variant="tonal"
+                          class="me-2"
+                        >
+                          <VImg
+                            v-if="item.raw.photo"
+                            :src="item.raw.photo"
+                          />
+                          <span v-else>{{ avatarText(item.raw.fullName) }}</span>
+                        </VAvatar>
+                      </template>
+                      <template #subtitle>
+                        {{ item.raw.phone }}
+                      </template>
+                    </VListItem>
+                  </template>
+                </VAutocomplete>
+              </VCol>
+
+              <!-- 👉 메모 -->
+              <VCol cols="12">
+                <VTextarea
+                  v-model="memo"
+                  label="메모"
+                  rows="3"
+                />
+              </VCol>
+
+              <!-- 👉 등록 / 취소 -->
               <VCol cols="12">
                 <VBtn
                   type="submit"
                   class="me-3"
                 >
-                  Submit
+                  등록
                 </VBtn>
                 <VBtn
                   type="reset"
@@ -203,7 +341,7 @@ const handleDrawerModelValueUpdate = val => {
                   color="secondary"
                   @click="closeNavigationDrawer"
                 >
-                  Cancel
+                  취소
                 </VBtn>
               </VCol>
             </VRow>
@@ -213,3 +351,20 @@ const handleDrawerModelValueUpdate = val => {
     </PerfectScrollbar>
   </VNavigationDrawer>
 </template>
+
+<style lang="scss" scoped>
+.avatar-upload-wrapper {
+  .avatar-upload-overlay {
+    position: absolute;
+    inset: 0;
+    border-radius: 4px;
+    background-color: rgba(0, 0, 0, 0.4);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+
+  &:hover .avatar-upload-overlay {
+    opacity: 1;
+  }
+}
+</style>

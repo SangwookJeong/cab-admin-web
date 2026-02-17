@@ -12,300 +12,209 @@ const users = [
   {
     id: 1,
     fullName: '김민준',
-    company: '테크 솔루션즈',
-    role: 'editor',
-    username: 'minjun.kim',
-    country: '대한민국',
-    contact: '010-1234-5678',
-    email: 'minjun.kim@example.com',
-    currentPlan: 'enterprise',
-    status: 'active',
-    avatar: avatar1,
+    phone: '010-1234-5678',
+    gender: '남',
+    birthDate: '1985-03-15',
+    salvationDate: '2005-07-20',
+    address1: '수원시 팔달구 인계동 123-4',
+    address2: '현대아파트 101동 502호',
+    district: '1교구',
+    zone: '1구역',
+    group: '1회',
+    vehicle: '있음',
+    family: [2, 5],
+    memo: '찬양팀 리더',
+    photo: avatar1,
   },
   {
     id: 2,
     fullName: '이서연',
-    company: '디지털 미디어',
-    role: 'author',
-    username: 'seoyeon.lee',
-    country: '대한민국',
-    contact: '010-2345-6789',
-    email: 'seoyeon.lee@example.com',
-    currentPlan: 'team',
-    status: 'active',
-    avatar: avatar2,
+    phone: '010-2345-6789',
+    gender: '여',
+    birthDate: '1990-08-22',
+    salvationDate: '2010-12-25',
+    address1: '수원시 영통구 영통동 456-7',
+    address2: '삼성래미안 203동 1201호',
+    district: '1교구',
+    zone: '2구역',
+    group: '1회',
+    vehicle: '없음',
+    family: [1],
+    memo: '주일학교 교사',
+    photo: avatar2,
   },
   {
     id: 3,
     fullName: '박지호',
-    company: '글로벌 코퍼레이션',
-    role: 'maintainer',
-    username: 'jiho.park',
-    country: '대한민국',
-    contact: '010-3456-7890',
-    email: 'jiho.park@example.com',
-    currentPlan: 'enterprise',
-    status: 'active',
-    avatar: avatar3,
+    phone: '010-3456-7890',
+    gender: '남',
+    birthDate: '1978-01-10',
+    salvationDate: '1998-04-12',
+    address1: '수원시 장안구 정자동 789-1',
+    address2: 'e편한세상 305동 801호',
+    district: '2교구',
+    zone: '1구역',
+    group: '2회',
+    vehicle: '있음',
+    family: [7],
+    memo: '장로',
+    photo: avatar3,
   },
   {
     id: 4,
     fullName: '최유진',
-    company: '스마트 테크놀로지',
-    role: 'subscriber',
-    username: 'yujin.choi',
-    country: '대한민국',
-    contact: '010-4567-8901',
-    email: 'yujin.choi@example.com',
-    currentPlan: 'team',
-    status: 'pending',
-    avatar: avatar4,
+    phone: '010-4567-8901',
+    gender: '여',
+    birthDate: '1995-11-05',
+    salvationDate: '2015-03-01',
+    address1: '수원시 권선구 권선동 234-5',
+    address2: '힐스테이트 102동 301호',
+    district: '2교구',
+    zone: '2구역',
+    group: '1회',
+    vehicle: '없음',
+    family: [],
+    memo: '',
+    photo: avatar4,
   },
   {
     id: 5,
     fullName: '정민서',
-    company: '이노베이션 그룹',
-    role: 'editor',
-    username: 'minseo.jung',
-    country: '대한민국',
-    contact: '010-5678-9012',
-    email: 'minseo.jung@example.com',
-    currentPlan: 'enterprise',
-    status: 'active',
-    avatar: avatar5,
+    phone: '010-5678-9012',
+    gender: '여',
+    birthDate: '1988-06-18',
+    salvationDate: '2008-09-15',
+    address1: '수원시 팔달구 매탄동 567-8',
+    address2: '자이아파트 401동 1502호',
+    district: '3교구',
+    zone: '1구역',
+    group: '1회',
+    vehicle: '있음',
+    family: [6],
+    memo: '권사, 여전도회 회장',
+    photo: avatar5,
   },
   {
     id: 6,
     fullName: '강도윤',
-    company: '크리에이티브 스튜디오',
-    role: 'author',
-    username: 'doyoon.kang',
-    country: '대한민국',
-    contact: '010-6789-0123',
-    email: 'doyoon.kang@example.com',
-    currentPlan: 'company',
-    status: 'active',
-    avatar: avatar6,
+    phone: '010-6789-0123',
+    gender: '남',
+    birthDate: '1982-09-30',
+    salvationDate: '2002-06-10',
+    address1: '수원시 영통구 망포동 890-2',
+    address2: '래미안 501동 601호',
+    district: '3교구',
+    zone: '2구역',
+    group: '2회',
+    vehicle: '있음',
+    family: [5],
+    memo: '집사, 주차봉사',
+    photo: avatar6,
   },
   {
     id: 7,
     fullName: '윤하은',
-    company: '비즈니스 솔루션',
-    role: 'subscriber',
-    username: 'haeun.yoon',
-    country: '대한민국',
-    contact: '010-7890-1234',
-    email: 'haeun.yoon@example.com',
-    currentPlan: 'company',
-    status: 'pending',
-    avatar: avatar7,
+    phone: '010-7890-1234',
+    gender: '여',
+    birthDate: '1992-04-25',
+    salvationDate: '2012-11-03',
+    address1: '수원시 장안구 율전동 345-6',
+    address2: '푸르지오 202동 901호',
+    district: '1교구',
+    zone: '3구역',
+    group: '1회',
+    vehicle: '없음',
+    family: [3],
+    memo: '성경공부 인도자',
+    photo: avatar7,
   },
   {
     id: 8,
     fullName: '임시우',
-    company: '데이터 애널리틱스',
-    role: 'maintainer',
-    username: 'siwoo.lim',
-    country: '대한민국',
-    contact: '010-8901-2345',
-    email: 'siwoo.lim@example.com',
-    currentPlan: 'enterprise',
-    status: 'active',
-    avatar: avatar8,
+    phone: '010-8901-2345',
+    gender: '남',
+    birthDate: '1975-12-08',
+    salvationDate: '1995-01-15',
+    address1: '수원시 권선구 곡선동 678-9',
+    address2: '아이파크 103동 1101호',
+    district: '2교구',
+    zone: '3구역',
+    group: '2회',
+    vehicle: '있음',
+    family: [9],
+    memo: '안수집사',
+    photo: avatar8,
   },
   {
     id: 9,
     fullName: '한지우',
-    company: '소프트웨어 개발',
-    role: 'editor',
-    username: 'jiwoo.han',
-    country: '대한민국',
-    contact: '010-9012-3456',
-    email: 'jiwoo.han@example.com',
-    currentPlan: 'team',
-    status: 'inactive',
-    avatar: avatar1,
+    phone: '010-9012-3456',
+    gender: '여',
+    birthDate: '1998-07-14',
+    salvationDate: '2018-05-20',
+    address1: '수원시 팔달구 우만동 901-3',
+    address2: '센트럴파크 701동 402호',
+    district: '3교구',
+    zone: '3구역',
+    group: '1회',
+    vehicle: '없음',
+    family: [8],
+    memo: '청년부',
+    photo: avatar1,
   },
   {
     id: 10,
     fullName: '신예준',
-    company: '클라우드 서비스',
-    role: 'author',
-    username: 'yejun.shin',
-    country: '대한민국',
-    contact: '010-0123-4567',
-    email: 'yejun.shin@example.com',
-    currentPlan: 'enterprise',
-    status: 'active',
-    avatar: avatar2,
-  },
-  {
-    id: 11,
-    fullName: '오서준',
-    company: '모바일 앱스',
-    role: 'subscriber',
-    username: 'seojun.oh',
-    country: '대한민국',
-    contact: '010-1357-2468',
-    email: 'seojun.oh@example.com',
-    currentPlan: 'team',
-    status: 'active',
-    avatar: avatar3,
-  },
-  {
-    id: 12,
-    fullName: '송하윤',
-    company: 'AI 리서치',
-    role: 'maintainer',
-    username: 'hayoon.song',
-    country: '대한민국',
-    contact: '010-2468-1357',
-    email: 'hayoon.song@example.com',
-    currentPlan: 'company',
-    status: 'pending',
-    avatar: avatar4,
-  },
-  {
-    id: 13,
-    fullName: '백준서',
-    company: '네트워크 시스템',
-    role: 'editor',
-    username: 'junseo.baek',
-    country: '대한민국',
-    contact: '010-3579-2468',
-    email: 'junseo.baek@example.com',
-    currentPlan: 'enterprise',
-    status: 'active',
-    avatar: avatar5,
-  },
-  {
-    id: 14,
-    fullName: '홍서아',
-    company: '웹 디자인',
-    role: 'author',
-    username: 'seoa.hong',
-    country: '대한민국',
-    contact: '010-4680-1357',
-    email: 'seoa.hong@example.com',
-    currentPlan: 'team',
-    status: 'active',
-    avatar: avatar6,
-  },
-  {
-    id: 15,
-    fullName: '조우진',
-    company: '게임 개발',
-    role: 'subscriber',
-    username: 'woojin.jo',
-    country: '대한민국',
-    contact: '010-5791-2468',
-    email: 'woojin.jo@example.com',
-    currentPlan: 'company',
-    status: 'inactive',
-    avatar: avatar7,
-  },
-  {
-    id: 16,
-    fullName: '권다은',
-    company: 'IoT 플랫폼',
-    role: 'maintainer',
-    username: 'daeun.kwon',
-    country: '대한민국',
-    contact: '010-6802-3579',
-    email: 'daeun.kwon@example.com',
-    currentPlan: 'enterprise',
-    status: 'active',
-    avatar: avatar8,
-  },
-  {
-    id: 17,
-    fullName: '안민지',
-    company: '마케팅 에이전시',
-    role: 'editor',
-    username: 'minji.ahn',
-    country: '대한민국',
-    contact: '010-7913-4680',
-    email: 'minji.ahn@example.com',
-    currentPlan: 'team',
-    status: 'pending',
-    avatar: avatar1,
-  },
-  {
-    id: 18,
-    fullName: '서준혁',
-    company: 'e커머스 플랫폼',
-    role: 'author',
-    username: 'junhyeok.seo',
-    country: '대한민국',
-    contact: '010-8024-5791',
-    email: 'junhyeok.seo@example.com',
-    currentPlan: 'enterprise',
-    status: 'active',
-    avatar: avatar2,
-  },
-  {
-    id: 19,
-    fullName: '류수빈',
-    company: '핀테크 스타트업',
-    role: 'subscriber',
-    username: 'subin.ryu',
-    country: '대한민국',
-    contact: '010-9135-6802',
-    email: 'subin.ryu@example.com',
-    currentPlan: 'company',
-    status: 'active',
-    avatar: avatar3,
-  },
-  {
-    id: 20,
-    fullName: '남태양',
-    company: '로봇 자동화',
-    role: 'maintainer',
-    username: 'taeyang.nam',
-    country: '대한민국',
-    contact: '010-0246-7913',
-    email: 'taeyang.nam@example.com',
-    currentPlan: 'team',
-    status: 'inactive',
-    avatar: avatar4,
-  },
-  {
-    id: 21,
-    fullName: '문채원',
-    company: '헬스케어 테크',
-    role: 'editor',
-    username: 'chaewon.moon',
-    country: '대한민국',
-    contact: '010-1234-5678',
-    email: 'chaewon.moon@example.com',
-    currentPlan: 'enterprise',
-    status: 'active',
-    avatar: avatar5,
+    phone: '010-0123-4567',
+    gender: '남',
+    birthDate: '1980-02-28',
+    salvationDate: '2000-08-08',
+    address1: '수원시 영통구 이의동 112-4',
+    address2: '광교호반써밋 201동 1801호',
+    district: '1교구',
+    zone: '1구역',
+    group: '2회',
+    vehicle: '있음',
+    family: [],
+    memo: '집사, 미디어팀',
+    photo: avatar2,
   },
 ]
 
+// 가족 ID 배열을 { id, fullName, phone, photo } 객체 배열로 변환
+function resolveFamilyMembers(familyIds) {
+  if (!Array.isArray(familyIds)) return []
+
+  return familyIds
+    .map(id => users.find(u => u.id === id))
+    .filter(Boolean)
+    .map(({ id, fullName, phone, photo }) => ({ id, fullName, phone, photo }))
+}
+
 mock.onGet('/apps/users/list').reply(config => {
-  const { q = '', options = {}, role = null, plan = null, status = null } = config.params ?? {}
+  const { q = '', options = {}, gender = null, district = null } = config.params ?? {}
   const { sortBy = '', itemsPerPage = 10, page = 1 } = options
 
   const queryLowered = q.toLowerCase()
-  const filteredData = users.filter(
-    user =>
+  const filteredData = users
+    .filter(user =>
       user.fullName.toLowerCase().includes(queryLowered) ||
-      user.email.toLowerCase().includes(queryLowered),
-  ).filter(user => (role !== null ? user.role === role : true)).filter(user => (plan !== null ? user.currentPlan === plan : true)).filter(user => (status !== null ? user.status === status : true))
+      user.phone.includes(queryLowered),
+    )
+    .filter(user => (gender !== null ? user.gender === gender : true))
+    .filter(user => (district !== null ? user.district === district : true))
 
   const sortedData = filteredData.sort((a, b) => {
-    if (sortBy === 'user')
+    if (sortBy === 'fullName')
       return a.fullName.localeCompare(b.fullName)
-    if (sortBy === 'email')
-      return a.email.localeCompare(b.email)
-    if (sortBy === 'role')
-      return a.role.localeCompare(b.role)
-    if (sortBy === 'plan')
-      return a.currentPlan.localeCompare(b.currentPlan)
-    if (sortBy === 'status')
-      return a.status.localeCompare(b.status)
+    if (sortBy === 'phone')
+      return a.phone.localeCompare(b.phone)
+    if (sortBy === 'district')
+      return a.district.localeCompare(b.district)
+    if (sortBy === 'zone')
+      return a.zone.localeCompare(b.zone)
+    if (sortBy === 'birthDate')
+      return a.birthDate.localeCompare(b.birthDate)
 
     return 0
   })
@@ -320,13 +229,34 @@ mock.onGet('/apps/users/list').reply(config => {
   ]
 })
 
+// 전체 성도 목록 (가족 선택용, id/fullName/phone/photo 만 반환)
+mock.onGet('/apps/users/all').reply(() => {
+  const allUsers = users.map(({ id, fullName, phone, photo }) => ({ id, fullName, phone, photo }))
+
+  return [200, { users: allUsers }]
+})
+
 mock.onGet(/\/apps\/users\/\d+/).reply(config => {
   const userId = Number(config.url?.substring(config.url.lastIndexOf('/') + 1))
   const user = users.find(e => e.id === userId)
   if (!user)
-    return [404, { message: '사용자를 찾을 수 없습니다' }]
+    return [404, { message: '성도를 찾을 수 없습니다' }]
 
-  return [200, { user }]
+  return [200, {
+    user: {
+      ...user,
+      familyMembers: resolveFamilyMembers(user.family),
+    },
+  }]
+})
+
+mock.onPost('/apps/users/user').reply(config => {
+  const { user: userData } = JSON.parse(config.data)
+  userData.id = users.length ? Math.max(...users.map(u => u.id)) + 1 : 1
+  if (!Array.isArray(userData.family)) userData.family = []
+  users.push(userData)
+
+  return [201, { user: userData }]
 })
 
 mock.onDelete(/\/apps\/users\/\d+/).reply(config => {

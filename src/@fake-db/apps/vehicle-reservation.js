@@ -7,12 +7,12 @@ const d = today.getDate()
 
 const data = {
   vehicles: [
-    { id: 'vehicle-1', name: '법인차량 1호', type: '세단', licensePlate: '12가 3456', color: 'primary' },
-    { id: 'vehicle-2', name: '법인차량 2호', type: '세단', licensePlate: '23나 4567', color: 'success' },
-    { id: 'vehicle-3', name: '법인차량 3호', type: 'SUV', licensePlate: '34다 5678', color: 'info' },
-    { id: 'vehicle-4', name: '법인차량 4호', type: '승합', licensePlate: '45라 6789', color: 'warning' },
-    { id: 'vehicle-5', name: '법인차량 5호', type: '세단', licensePlate: '56마 7890', color: 'error' },
-    { id: 'vehicle-6', name: '법인차량 6호', type: 'SUV', licensePlate: '67바 8901', color: 'secondary' },
+    { id: 'vehicle-1', vehicleColor: '흰색', type: '세단', licensePlate: '12가 3456', color: 'primary' },
+    { id: 'vehicle-2', vehicleColor: '검정', type: '세단', licensePlate: '23나 4567', color: 'success' },
+    { id: 'vehicle-3', vehicleColor: '은색', type: 'SUV', licensePlate: '34다 5678', color: 'info' },
+    { id: 'vehicle-4', vehicleColor: '흰색', type: '승합', licensePlate: '45라 6789', color: 'warning' },
+    { id: 'vehicle-5', vehicleColor: '검정', type: '세단', licensePlate: '56마 7890', color: 'error' },
+    { id: 'vehicle-6', vehicleColor: '은색', type: 'SUV', licensePlate: '67바 8901', color: 'secondary' },
   ],
   events: [
     {

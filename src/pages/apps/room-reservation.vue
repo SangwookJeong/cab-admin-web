@@ -23,7 +23,7 @@ watch(isEventHandlerSidebarActive, val => {
 })
 
 const { isLeftSidebarOpen } = useResponsiveLeftSidebar()
-const { refCalendar, calendarOptions, addEvent, updateEvent, removeEvent, conflictError } = useRoomCalendar(event, isEventHandlerSidebarActive, isLeftSidebarOpen)
+const { refCalendar, calendarOptions, addEvent, updateEvent, removeEvent, conflictError, refetchEvents } = useRoomCalendar(event, isEventHandlerSidebarActive, isLeftSidebarOpen)
 
 // Snackbar for conflict errors
 const showConflictSnackbar = ref(false)
@@ -43,6 +43,37 @@ const checkAll = computed({
       store.selectedRoomIds = []
   },
 })
+
+// ── 회의실 추가/삭제 ──
+const colorOptions = ['primary', 'success', 'error', 'warning', 'info', 'secondary']
+const showAddRoom = ref(false)
+const newRoomName = ref('')
+const newRoomLocation = ref('')
+const newRoomCapacity = ref(4)
+const newRoomColor = ref('primary')
+
+const addRoom = async () => {
+  const name = newRoomName.value.trim()
+  if (!name) return
+  await store.addRoom({
+    name,
+    location: newRoomLocation.value.trim() || '-',
+    capacity: newRoomCapacity.value || 4,
+    color: newRoomColor.value,
+    amenities: [],
+  })
+  newRoomName.value = ''
+  newRoomLocation.value = ''
+  newRoomCapacity.value = 4
+  newRoomColor.value = 'primary'
+  showAddRoom.value = false
+  refetchEvents()
+}
+
+const removeRoom = async roomId => {
+  await store.removeRoom(roomId)
+  refetchEvents()
+}
 </script>
 
 <template>
@@ -52,24 +83,80 @@ const checkAll = computed({
         <!-- 좌측 사이드바 -->
         <VNavigationDrawer
           v-model="isLeftSidebarOpen"
-          width="250"
+          width="280"
           absolute
           touchless
           location="start"
           class="calendar-add-event-drawer"
           :temporary="$vuetify.display.mdAndDown"
         >
-          <div class="pa-5 d-flex flex-column gap-y-8">
+          <div class="pa-5 d-flex flex-column gap-y-6">
             <VBtn
               block
               @click="isEventHandlerSidebarActive = true"
             >
               예약 추가
             </VBtn>
+
             <div>
-              <p class="text-sm text-uppercase text-medium-emphasis mb-3">
-                회의실
-              </p>
+              <div class="d-flex align-center justify-space-between mb-3">
+                <p class="text-sm text-uppercase text-medium-emphasis mb-0">
+                  회의실
+                </p>
+                <VBtn
+                  icon
+                  variant="text"
+                  size="x-small"
+                  color="default"
+                  @click="showAddRoom = !showAddRoom"
+                >
+                  <VIcon :icon="showAddRoom ? 'mdi-close' : 'mdi-plus'" size="18" />
+                </VBtn>
+              </div>
+
+              <!-- 회의실 추가 폼 -->
+              <div v-if="showAddRoom" class="mb-3 d-flex flex-column gap-y-2">
+                <VTextField
+                  v-model="newRoomName"
+                  density="compact"
+                  hide-details
+                  placeholder="회의실명"
+                  @keyup.enter="addRoom"
+                />
+                <div class="d-flex gap-2">
+                  <VTextField
+                    v-model="newRoomLocation"
+                    density="compact"
+                    hide-details
+                    placeholder="위치"
+                    style="flex: 1;"
+                  />
+                  <VTextField
+                    v-model.number="newRoomCapacity"
+                    density="compact"
+                    hide-details
+                    placeholder="인원"
+                    type="number"
+                    style="flex: 0 0 60px;"
+                  />
+                </div>
+                <div class="d-flex align-center gap-2">
+                  <VBadge
+                    v-for="c in colorOptions"
+                    :key="c"
+                    :color="c"
+                    inline
+                    dot
+                    class="cursor-pointer"
+                    :style="newRoomColor === c ? 'outline: 2px solid currentColor; border-radius: 50%;' : ''"
+                    @click="newRoomColor = c"
+                  />
+                  <VSpacer />
+                  <VBtn size="small" @click="addRoom">
+                    추가
+                  </VBtn>
+                </div>
+              </div>
 
               <div class="d-flex flex-column calendars-checkbox">
                 <VCheckbox
@@ -78,20 +165,46 @@ const checkAll = computed({
                   color="secondary"
                   density="default"
                 />
-                <VCheckbox
+                <div
                   v-for="room in store.rooms"
                   :key="room.id"
-                  v-model="store.selectedRoomIds"
-                  :value="room.id"
-                  :color="room.color"
-                  :label="`${room.name} (${room.capacity}명)`"
-                  density="default"
-                />
+                  class="d-flex align-center calendar-item"
+                >
+                  <VCheckbox
+                    v-model="store.selectedRoomIds"
+                    :value="room.id"
+                    :color="room.color"
+                    :label="`${room.name} (${room.capacity}명)`"
+                    density="default"
+                    class="flex-grow-1"
+                  />
+                  <VBtn
+                    icon
+                    variant="text"
+                    size="x-small"
+                    color="default"
+                    class="calendar-item-delete"
+                    @click="removeRoom(room.id)"
+                  >
+                    <VIcon icon="mdi-close" size="14" />
+                  </VBtn>
+                </div>
               </div>
             </div>
           </div>
         </VNavigationDrawer>
         <VMain>
+          <!-- Sidebar toggle button -->
+          <VBtn
+            icon
+            variant="text"
+            size="small"
+            class="sidebar-toggler d-none d-lg-flex"
+            @click="isLeftSidebarOpen = !isLeftSidebarOpen"
+          >
+            <VIcon :icon="isLeftSidebarOpen ? 'mdi-chevron-left' : 'mdi-chevron-right'" />
+          </VBtn>
+
           <VCard flat>
             <FullCalendar
               ref="refCalendar"
@@ -145,6 +258,20 @@ const checkAll = computed({
     border-start-start-radius: 0.375rem;
   }
 }
+
+.fc-daygrid-event {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.fc-daygrid-event .fc-event-main,
+.fc-daygrid-event .fc-event-main-frame,
+.fc-daygrid-event .fc-event-title {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
 </style>
 
 <style lang="scss" scoped>
@@ -154,5 +281,28 @@ const checkAll = computed({
   .v-card {
     overflow: visible;
   }
+}
+
+.sidebar-toggler {
+  position: absolute;
+  z-index: 1;
+  inset-block-start: 10px;
+  inset-inline-start: 4px;
+}
+
+// 삭제 버튼은 hover 시에만 표시
+.calendar-item {
+  .calendar-item-delete {
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+
+  &:hover .calendar-item-delete {
+    opacity: 1;
+  }
+}
+
+.cursor-pointer {
+  cursor: pointer;
 }
 </style>

@@ -5,9 +5,8 @@ import { avatarText } from '@core/utils/formatters'
 
 const userListStore = useUserListStore()
 const searchQuery = ref('')
-const selectedRole = ref()
-const selectedPlan = ref()
-const selectedStatus = ref()
+const selectedGender = ref()
+const selectedDistrict = ref()
 const rowPerPage = ref(10)
 const currentPage = ref(1)
 const totalPage = ref(1)
@@ -18,9 +17,8 @@ const users = ref([])
 const fetchUsers = () => {
   userListStore.fetchUsers({
     q: searchQuery.value,
-    status: selectedStatus.value,
-    plan: selectedPlan.value,
-    role: selectedRole.value,
+    gender: selectedGender.value,
+    district: selectedDistrict.value,
     perPage: rowPerPage.value,
     currentPage: currentPage.value,
   }).then(response => {
@@ -41,128 +39,31 @@ watchEffect(() => {
 })
 
 // 👉 search filters
-const roles = [
-  {
-    title: 'Admin',
-    value: 'admin',
-  },
-  {
-    title: 'Author',
-    value: 'author',
-  },
-  {
-    title: 'Editor',
-    value: 'editor',
-  },
-  {
-    title: 'Maintainer',
-    value: 'maintainer',
-  },
-  {
-    title: 'Subscriber',
-    value: 'subscriber',
-  },
+const genders = [
+  { title: '남', value: '남' },
+  { title: '여', value: '여' },
 ]
 
-const plans = [
-  {
-    title: 'Basic',
-    value: 'basic',
-  },
-  {
-    title: 'Company',
-    value: 'company',
-  },
-  {
-    title: 'Enterprise',
-    value: 'enterprise',
-  },
-  {
-    title: 'Team',
-    value: 'team',
-  },
+const districts = [
+  { title: '1교구', value: '1교구' },
+  { title: '2교구', value: '2교구' },
+  { title: '3교구', value: '3교구' },
 ]
-
-const status = [
-  {
-    title: 'Pending',
-    value: 'pending',
-  },
-  {
-    title: 'Active',
-    value: 'active',
-  },
-  {
-    title: 'Inactive',
-    value: 'inactive',
-  },
-]
-
-const resolveUserRoleVariant = role => {
-  if (role === 'subscriber')
-    return {
-      color: 'primary',
-      icon: 'mdi-account-outline',
-    }
-  if (role === 'author')
-    return {
-      color: 'warning',
-      icon: 'mdi-cog-outline',
-    }
-  if (role === 'maintainer')
-    return {
-      color: 'success',
-      icon: 'mdi-chart-donut',
-    }
-  if (role === 'editor')
-    return {
-      color: 'info',
-      icon: 'mdi-pencil-outline',
-    }
-  if (role === 'admin')
-    return {
-      color: 'error',
-      icon: 'mdi-laptop',
-    }
-  
-  return {
-    color: 'primary',
-    icon: 'mdi-account-outline',
-  }
-}
-
-const resolveUserStatusVariant = stat => {
-  if (stat === 'pending')
-    return 'warning'
-  if (stat === 'active')
-    return 'success'
-  if (stat === 'inactive')
-    return 'secondary'
-  
-  return 'primary'
-}
 
 const isAddNewUserDrawerVisible = ref(false)
-
-// 👉 watching current page
-watchEffect(() => {
-  if (currentPage.value > totalPage.value)
-    currentPage.value = totalPage.value
-})
 
 // 👉 Computing pagination data
 const paginationData = computed(() => {
   const firstIndex = users.value.length ? (currentPage.value - 1) * rowPerPage.value + 1 : 0
   const lastIndex = users.value.length + (currentPage.value - 1) * rowPerPage.value
-  
-  return `${ firstIndex }-${ lastIndex } of ${ totalUsers.value }`
+
+  return `${ firstIndex }-${ lastIndex } / ${ totalUsers.value }`
 })
 
 // SECTION Checkbox toggle
 const selectedRows = ref([])
 const selectAllUser = ref(false)
 
-// 👉 add/remove all checkbox ids in array
 const selectUnselectAll = () => {
   selectAllUser.value = !selectAllUser.value
   if (selectAllUser.value) {
@@ -175,7 +76,6 @@ const selectUnselectAll = () => {
   }
 }
 
-// 👉 watch if checkbox array is empty all select should be uncheck
 watch(selectedRows, () => {
   if (!selectedRows.value.length)
     selectAllUser.value = false
@@ -198,53 +98,45 @@ const addNewUser = userData => {
   // refetch User
   fetchUsers()
 }
+
+const deleteUser = id => {
+  userListStore.deleteUser(id).then(() => {
+    fetchUsers()
+  })
+}
 </script>
 
 <template>
   <section>
     <VCard
-      title="Filters"
+      title="필터"
       class="mb-6"
     >
       <VCardText>
         <VRow>
-          <!-- 👉 Select Role -->
+          <!-- 👉 성별 필터 -->
           <VCol
             cols="12"
-            sm="4"
+            sm="6"
           >
             <VSelect
-              v-model="selectedRole"
-              label="Select Role"
-              :items="roles"
+              v-model="selectedGender"
+              label="성별"
+              :items="genders"
               clearable
               clear-icon="mdi-close"
             />
           </VCol>
 
-          <!-- 👉 Select Plan -->
+          <!-- 👉 교구 필터 -->
           <VCol
             cols="12"
-            sm="4"
+            sm="6"
           >
             <VSelect
-              v-model="selectedPlan"
-              label="Select Plan"
-              :items="plans"
-              clearable
-              clear-icon="mdi-close"
-            />
-          </VCol>
-
-          <!-- 👉 Select Status -->
-          <VCol
-            cols="12"
-            sm="4"
-          >
-            <VSelect
-              v-model="selectedStatus"
-              label="Select Status"
-              :items="status"
+              v-model="selectedDistrict"
+              label="교구"
+              :items="districts"
               clearable
               clear-icon="mdi-close"
             />
@@ -255,29 +147,29 @@ const addNewUser = userData => {
 
     <VCard>
       <VCardText class="d-flex flex-wrap gap-4">
-        <!-- 👉 Export button -->
+        <!-- 👉 내보내기 버튼 -->
         <VBtn
           variant="tonal"
           color="secondary"
           prepend-icon="mdi-tray-arrow-up"
         >
-          Export
+          내보내기
         </VBtn>
 
         <VSpacer />
 
         <div class="app-user-search-filter d-flex align-center">
-          <!-- 👉 Search  -->
+          <!-- 👉 검색 -->
           <VTextField
             v-model="searchQuery"
-            placeholder="Search User"
+            placeholder="성도 검색"
             density="compact"
             class="me-3"
           />
 
-          <!-- 👉 Add user button -->
+          <!-- 👉 성도 등록 버튼 -->
           <VBtn @click="isAddNewUserDrawerVisible = true">
-            Add User
+            성도 등록
           </VBtn>
         </div>
       </VCardText>
@@ -298,22 +190,22 @@ const addNewUser = userData => {
               </div>
             </th>
             <th scope="col">
-              USER
+              이름
             </th>
             <th scope="col">
-              EMAIL
+              전화번호
             </th>
             <th scope="col">
-              ROLE
+              교구
             </th>
             <th scope="col">
-              PLAN
+              구역
             </th>
             <th scope="col">
-              STATUS
+              생년월일
             </th>
             <th scope="col">
-              ACTIONS
+              관리
             </th>
           </tr>
         </thead>
@@ -335,18 +227,18 @@ const addNewUser = userData => {
               </div>
             </td>
 
-            <!-- 👉 User -->
+            <!-- 👉 이름 (+사진) -->
             <td>
               <div class="d-flex align-center">
                 <VAvatar
                   variant="tonal"
-                  :color="resolveUserRoleVariant(user.role).color"
+                  color="primary"
                   class="me-3"
                   size="34"
                 >
                   <VImg
-                    v-if="user.avatar"
-                    :src="user.avatar"
+                    v-if="user.photo"
+                    :src="user.photo"
                   />
                   <span v-else>{{ avatarText(user.fullName) }}</span>
                 </VAvatar>
@@ -360,44 +252,32 @@ const addNewUser = userData => {
                       {{ user.fullName }}
                     </RouterLink>
                   </h6>
-                  <span class="text-xs text-medium-emphasis">@{{ user.username }}</span>
+                  <span class="text-xs text-medium-emphasis">{{ user.gender }}</span>
                 </div>
               </div>
             </td>
 
-            <!-- 👉 Email -->
+            <!-- 👉 전화번호 -->
             <td class="text-medium-emphasis">
-              {{ user.email }}
+              {{ user.phone }}
             </td>
 
-            <!-- 👉 Role -->
+            <!-- 👉 교구 -->
             <td>
-              <VIcon
-                :icon="resolveUserRoleVariant(user.role).icon"
-                :color="resolveUserRoleVariant(user.role).color"
-                :size="22"
-                class="me-3"
-              />
-              <span class="text-capitalize text-medium-emphasis">{{ user.role }}</span>
+              {{ user.district }}
             </td>
 
-            <!-- 👉 Plan -->
-            <td class="text-capitalize">
-              {{ user.currentPlan }}
-            </td>
-
-            <!-- 👉 Status -->
+            <!-- 👉 구역 -->
             <td>
-              <VChip
-                :color="resolveUserStatusVariant(user.status)"
-                size="small"
-                class="text-capitalize"
-              >
-                {{ user.status }}
-              </VChip>
+              {{ user.zone }}
             </td>
 
-            <!-- 👉 Actions -->
+            <!-- 👉 생년월일 -->
+            <td>
+              {{ user.birthDate }}
+            </td>
+
+            <!-- 👉 관리 -->
             <td
               class="text-center"
               style="width: 5rem;"
@@ -424,21 +304,10 @@ const addNewUser = userData => {
                         />
                       </template>
 
-                      <VListItemTitle>View</VListItemTitle>
+                      <VListItemTitle>상세보기</VListItemTitle>
                     </VListItem>
 
-                    <VListItem href="javascript:void(0)">
-                      <template #prepend>
-                        <VIcon
-                          icon="mdi-pencil-outline"
-                          :size="20"
-                          class="me-3"
-                        />
-                      </template>
-                      <VListItemTitle>Edit</VListItemTitle>
-                    </VListItem>
-
-                    <VListItem href="javascript:void(0)">
+                    <VListItem @click="deleteUser(user.id)">
                       <template #prepend>
                         <VIcon
                           icon="mdi-delete-outline"
@@ -447,7 +316,7 @@ const addNewUser = userData => {
                         />
                       </template>
 
-                      <VListItemTitle>Delete</VListItemTitle>
+                      <VListItemTitle>삭제</VListItemTitle>
                     </VListItem>
                   </VList>
                 </VMenu>
@@ -456,14 +325,14 @@ const addNewUser = userData => {
           </tr>
         </tbody>
 
-        <!-- 👉 table footer  -->
+        <!-- 👉 table footer -->
         <tfoot v-show="!users.length">
           <tr>
             <td
               colspan="7"
               class="text-center"
             >
-              No data available
+              데이터가 없습니다
             </td>
           </tr>
         </tfoot>
@@ -476,7 +345,7 @@ const addNewUser = userData => {
           class="d-flex align-center me-3"
           style="width: 171px;"
         >
-          <span class="text-no-wrap me-3">Rows per page:</span>
+          <span class="text-no-wrap me-3">페이지당 행:</span>
 
           <VSelect
             v-model="rowPerPage"
@@ -504,7 +373,7 @@ const addNewUser = userData => {
       </VCardText>
     </VCard>
 
-    <!-- 👉 Add New User -->
+    <!-- 👉 성도 등록 -->
     <AddNewUserDrawer
       v-model:isDrawerOpen="isAddNewUserDrawerVisible"
       @user-data="addNewUser"

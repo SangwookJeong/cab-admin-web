@@ -4,6 +4,7 @@ const today = new Date()
 const y = today.getFullYear()
 const m = today.getMonth()
 const d = today.getDate()
+const h = today.getHours()
 
 const data = {
   rooms: [
@@ -111,6 +112,14 @@ const data = {
       end: new Date(y, m, d + 1, 15, 0).toISOString(),
       allDay: false,
       extendedProps: { resourceType: 'room', resourceId: 'room-1', booker: '이서연', description: 'A프로젝트 회고', attendees: ['김민준', '박지호'] },
+    },
+    {
+      id: '13',
+      title: '긴급 기술 회의',
+      start: new Date(y, m, d, h, 0).toISOString(),
+      end: new Date(y, m, d, h + 1, 30).toISOString(),
+      allDay: false,
+      extendedProps: { resourceType: 'room', resourceId: 'room-1', booker: '정상욱', description: '서버 장애 대응 회의', attendees: ['김민준', '이서연', '박지호'] },
     },
   ],
 }

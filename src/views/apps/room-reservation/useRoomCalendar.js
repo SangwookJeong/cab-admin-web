@@ -2,6 +2,7 @@ import dayGridPlugin from '@fullcalendar/daygrid'
 import interactionPlugin from '@fullcalendar/interaction'
 import listPlugin from '@fullcalendar/list'
 import timeGridPlugin from '@fullcalendar/timegrid'
+import koLocale from '@fullcalendar/core/locales/ko'
 import { useThemeConfig } from '@core/composable/useThemeConfig'
 import { useRoomReservationStore } from '@/views/apps/room-reservation/useRoomReservationStore'
 
@@ -146,21 +147,24 @@ export const useRoomCalendar = (event, isEventHandlerSidebarActive, isLeftSideba
 
   const calendarOptions = {
     plugins: [dayGridPlugin, interactionPlugin, timeGridPlugin, listPlugin],
-    initialView: 'timeGridWeek',
+    initialView: 'dayGridMonth',
     headerToolbar: {
       start: 'drawerToggler,prev,next title',
-      end: 'timeGridWeek,timeGridDay,listMonth',
+      end: 'dayGridMonth,timeGridWeek,timeGridDay,listMonth',
     },
     events: fetchEvents,
     forceEventDuration: true,
     editable: true,
     eventResizableFromStart: true,
     dragScroll: true,
-    navLinks: true,
-    slotMinTime: '07:00:00',
-    slotMaxTime: '22:00:00',
-    allDaySlot: false,
-    locale: 'ko',
+    dayMaxEvents: 2,
+    locale: koLocale,
+    buttonText: {
+      month: '월',
+      week: '주',
+      day: '일',
+      list: '목록',
+    },
     eventClassNames({ event: calendarEvent }) {
       const colorName = getRoomColor(calendarEvent._def.extendedProps.resourceId)
 

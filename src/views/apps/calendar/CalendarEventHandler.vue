@@ -138,7 +138,6 @@ const endDateTimePickerConfig = computed(() => {
   <VDialog
     :model-value="props.isDrawerOpen"
     max-width="700"
-    persistent
     content-class="dialog-top"
     @update:model-value="(val) => $emit('update:isDrawerOpen', val)"
   >

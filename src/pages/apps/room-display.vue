@@ -134,12 +134,20 @@ onBeforeUnmount(() => {
           v-model="selectedRoomId"
           :items="rooms"
           item-value="id"
-          :item-title="r => `${r.name} (${r.location}, ${r.capacity}명)`"
-          label="회의실 선택"
+          item-title="name"
+          placeholder="회의실 선택"
           hide-details
           density="compact"
           class="room-selector"
-        />
+        >
+          <template #item="{ props: itemProps, item }">
+            <VListItem v-bind="itemProps">
+              <template #append>
+                <span class="text-medium-emphasis text-caption">{{ item.raw.location }} | {{ item.raw.capacity }}명</span>
+              </template>
+            </VListItem>
+          </template>
+        </VSelect>
         <VSpacer />
         <span class="room-display-clock font-weight-bold">{{ currentTimeStr }}</span>
         <VBtn
@@ -179,12 +187,9 @@ onBeforeUnmount(() => {
           >
             <VCardText class="d-flex flex-column align-center justify-center text-center flex-grow-1 room-status-panel">
               <!-- Room name -->
-              <h1 class="room-name font-weight-bold mb-1">
+              <h1 class="room-name font-weight-bold mb-4">
                 {{ selectedRoom.name }}
               </h1>
-              <div class="room-meta text-medium-emphasis mb-4">
-                {{ selectedRoom.location }} | {{ selectedRoom.capacity }}명
-              </div>
 
               <!-- Status chip -->
               <VChip
@@ -200,17 +205,11 @@ onBeforeUnmount(() => {
                 <h2 class="room-event-title font-weight-bold mb-2">
                   {{ currentEvent.title }}
                 </h2>
-                <div class="room-event-detail text-medium-emphasis mb-1">
+                <div class="room-event-booker font-weight-bold mb-2">
                   {{ currentEvent.extendedProps.booker }}
                 </div>
-                <div class="room-event-detail mb-2">
+                <div class="room-event-time">
                   {{ formatTimeRange(currentEvent.start, currentEvent.end) }}
-                </div>
-                <div
-                  v-if="currentEvent.extendedProps.description"
-                  class="room-event-sub text-medium-emphasis mt-1"
-                >
-                  {{ currentEvent.extendedProps.description }}
                 </div>
               </template>
 
@@ -222,10 +221,10 @@ onBeforeUnmount(() => {
                 <h2 class="room-event-title font-weight-bold mb-2">
                   {{ nextEvent.title }}
                 </h2>
-                <div class="room-event-detail text-medium-emphasis mb-1">
+                <div class="room-event-booker font-weight-bold mb-2">
                   {{ nextEvent.extendedProps.booker }}
                 </div>
-                <div class="room-event-detail">
+                <div class="room-event-time">
                   {{ formatTimeRange(nextEvent.start, nextEvent.end) }}
                 </div>
               </template>
@@ -368,10 +367,6 @@ onBeforeUnmount(() => {
   line-height: 1.2;
 }
 
-.room-meta {
-  font-size: clamp(0.85rem, 1.5vw, 1.15rem);
-}
-
 .room-status-chip {
   font-size: clamp(1rem, 2vw, 1.5rem) !important;
   block-size: auto !important;
@@ -380,12 +375,17 @@ onBeforeUnmount(() => {
 }
 
 .room-event-title {
-  font-size: clamp(1.2rem, 3vw, 2.25rem);
+  font-size: clamp(1.2rem, 2.5vw, 2rem);
   line-height: 1.3;
 }
 
-.room-event-detail {
-  font-size: clamp(0.95rem, 1.8vw, 1.35rem);
+.room-event-booker {
+  font-size: clamp(1.4rem, 3.5vw, 2.75rem);
+  line-height: 1.3;
+}
+
+.room-event-time {
+  font-size: clamp(1.2rem, 3vw, 2.25rem);
 }
 
 .room-event-sub {
@@ -452,10 +452,6 @@ onBeforeUnmount(() => {
     font-size: clamp(2rem, 5vw, 4rem);
   }
 
-  .room-meta {
-    font-size: clamp(1rem, 2vw, 1.5rem);
-  }
-
   .room-status-chip {
     font-size: clamp(1.2rem, 2.5vw, 2rem) !important;
     padding-block: clamp(10px, 1.5vw, 20px);
@@ -463,11 +459,15 @@ onBeforeUnmount(() => {
   }
 
   .room-event-title {
-    font-size: clamp(1.5rem, 3.5vw, 3rem);
+    font-size: clamp(1.5rem, 3vw, 2.5rem);
   }
 
-  .room-event-detail {
-    font-size: clamp(1.1rem, 2.2vw, 1.75rem);
+  .room-event-booker {
+    font-size: clamp(2rem, 4.5vw, 3.5rem);
+  }
+
+  .room-event-time {
+    font-size: clamp(1.5rem, 3.5vw, 3rem);
   }
 
   .room-event-sub {

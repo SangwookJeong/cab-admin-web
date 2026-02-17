@@ -90,7 +90,6 @@ const endDateTimePickerConfig = computed(() => {
   <VDialog
     :model-value="props.isDrawerOpen"
     max-width="700"
-    persistent
     content-class="dialog-top"
     @update:model-value="(val) => $emit('update:isDrawerOpen', val)"
   >
@@ -151,7 +150,7 @@ const endDateTimePickerConfig = computed(() => {
                 :rules="[requiredValidator]"
                 :items="store.vehicles"
                 item-value="id"
-                :item-title="item => `${item.name} (${item.licensePlate})`"
+                :item-title="item => `${item.vehicleColor} ${item.type} ${item.licensePlate}`"
               >
                 <template #selection="{ item }">
                   <div
@@ -165,7 +164,7 @@ const endDateTimePickerConfig = computed(() => {
                       dot
                       class="pa-1"
                     />
-                    <span>{{ item.raw.name }}</span>
+                    <span>{{ item.raw.vehicleColor }} {{ item.raw.type }} {{ item.raw.licensePlate }}</span>
                   </div>
                 </template>
                 <template #item="{ props: itemProps, item }">

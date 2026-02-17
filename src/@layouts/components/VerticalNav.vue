@@ -110,16 +110,10 @@ const handleNavScroll = evt => {
         <template v-if="!isLessThanOverlayNavBreakpoint(windowWidth)">
           <Component
             :is="config.app.iconRenderer || 'div'"
-            v-show="isCollapsed && !hideTitleAndIcon"
+            v-show="!hideTitleAndIcon"
             class="header-action"
-            v-bind="config.icons.verticalNavUnPinned"
-            @click="isCollapsed = !isCollapsed"
-          />
-          <Component
-            :is="config.app.iconRenderer || 'div'"
-            v-show="!isCollapsed && !hideTitleAndIcon"
-            class="header-action"
-            v-bind="config.icons.verticalNavPinned"
+            :icon="isCollapsed ? 'mdi-menu' : 'mdi-menu-open'"
+            tag="i"
             @click="isCollapsed = !isCollapsed"
           />
         </template>

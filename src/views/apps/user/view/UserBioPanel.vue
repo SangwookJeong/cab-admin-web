@@ -1,8 +1,5 @@
 <script setup>
-import {
-  avatarText,
-  kFormatter,
-} from '@core/utils/formatters'
+import { avatarText } from '@core/utils/formatters'
 
 const props = defineProps({
   userData: {
@@ -11,108 +8,88 @@ const props = defineProps({
   },
 })
 
-const standardPlan = {
-  plan: 'Standard',
-  price: 99,
-  benefits: [
-    '10 Users',
-    'Up to 10GB storage',
-    'Basic Support',
-  ],
-}
+const emit = defineEmits(['edit', 'update:photo'])
 
-const isUserInfoEditDialogVisible = ref(false)
-const isUpgradePlanDialogVisible = ref(false)
+const refFileInput = ref()
 
-const resolveUserStatusVariant = stat => {
-  if (stat === 'pending')
-    return 'warning'
-  if (stat === 'active')
-    return 'success'
-  if (stat === 'inactive')
-    return 'secondary'
-  
-  return 'primary'
-}
+const onPhotoUpload = event => {
+  const file = event.target.files[0]
+  if (!file) return
 
-const resolveUserRoleVariant = role => {
-  if (role === 'subscriber')
-    return {
-      color: 'primary',
-      icon: 'mdi-account-outline',
-    }
-  if (role === 'author')
-    return {
-      color: 'warning',
-      icon: 'mdi-cog-outline',
-    }
-  if (role === 'maintainer')
-    return {
-      color: 'success',
-      icon: 'mdi-database-outline',
-    }
-  if (role === 'editor')
-    return {
-      color: 'info',
-      icon: 'mdi-pencil-outline',
-    }
-  if (role === 'admin')
-    return {
-      color: 'error',
-      icon: 'mdi-dns-outline',
-    }
-  
-  return {
-    color: 'primary',
-    icon: 'mdi-account-outline',
+  const reader = new FileReader()
+  reader.onload = e => {
+    emit('update:photo', e.target.result)
   }
+  reader.readAsDataURL(file)
 }
 </script>
 
 <template>
-  <VRow>
-    <!-- SECTION User Details -->
-    <VCol cols="12">
-      <VCard v-if="props.userData">
-        <VCardText class="text-center pt-15">
-          <!-- 👉 Avatar -->
-          <VAvatar
-            rounded="sm"
-            :size="120"
-            color="primary"
-            variant="tonal"
+  <VCard
+    v-if="props.userData"
+    class="h-100 d-flex flex-column"
+  >
+        <VCardText class="text-center pt-10 pb-4">
+          <!-- 👉 Avatar (클릭하여 사진 업로드) -->
+          <div
+            class="avatar-upload-wrapper d-inline-block position-relative cursor-pointer"
+            @click="refFileInput?.click()"
           >
-            <VImg
-              v-if="props.userData.avatar"
-              :src="props.userData.avatar"
-            />
-            <span
-              v-else
-              class="text-5xl font-weight-medium"
+            <VAvatar
+              rounded="sm"
+              :size="110"
+              color="primary"
+              variant="tonal"
             >
-              {{ avatarText(props.userData.fullName) }}
-            </span>
-          </VAvatar>
+              <VImg
+                v-if="props.userData.photo"
+                :src="props.userData.photo"
+              />
+              <span
+                v-else
+                class="text-5xl font-weight-medium"
+              >
+                {{ avatarText(props.userData.fullName) }}
+              </span>
+            </VAvatar>
 
-          <!-- 👉 User fullName -->
+            <!-- 카메라 오버레이 -->
+            <div class="avatar-upload-overlay d-flex align-center justify-center">
+              <VIcon
+                icon="mdi-camera"
+                color="white"
+                size="28"
+              />
+            </div>
+
+            <input
+              ref="refFileInput"
+              type="file"
+              accept="image/*"
+              hidden
+              @change="onPhotoUpload"
+            >
+          </div>
+
+          <!-- 👉 이름 -->
           <h6 class="text-h6 mt-4">
             {{ props.userData.fullName }}
           </h6>
 
-          <!-- 👉 Role chip -->
+          <!-- 👉 교구/구역 chip -->
           <VChip
             label
-            :color="resolveUserRoleVariant(props.userData.role).color"
+            color="primary"
             size="small"
-            class="text-capitalize mt-4"
+            class="mt-4"
           >
-            {{ props.userData.role }}
+            {{ props.userData.district }} · {{ props.userData.zone }}
           </VChip>
         </VCardText>
 
-        <VCardText class="d-flex justify-center flex-wrap mt-3">
-          <!-- 👉 Done task -->
-          <div class="d-flex align-center me-8 mb-2">
+        <VCardText class="d-flex justify-center flex-wrap py-4">
+          <!-- 👉 교구 -->
+          <div class="d-flex align-center me-8">
             <VAvatar
               :size="44"
               rounded
@@ -122,20 +99,20 @@ const resolveUserRoleVariant = role => {
             >
               <VIcon
                 size="22"
-                icon="mdi-check"
+                icon="mdi-church"
               />
             </VAvatar>
 
             <div>
-              <h6 class="text-h6">
-                {{ kFormatter(props.userData.taskDone) }}
+              <h6 class="text-body-1 font-weight-medium">
+                {{ props.userData.district }}
               </h6>
-              <span>Task Done</span>
+              <span class="text-sm">교구</span>
             </div>
           </div>
 
-          <!-- 👉 Done Project -->
-          <div class="d-flex align-center me-4 mb-2">
+          <!-- 👉 구역 -->
+          <div class="d-flex align-center">
             <VAvatar
               :size="44"
               rounded
@@ -145,35 +122,38 @@ const resolveUserRoleVariant = role => {
             >
               <VIcon
                 size="22"
-                icon="mdi-briefcase-variant-outline"
+                icon="mdi-account-group-outline"
               />
             </VAvatar>
 
             <div>
-              <h6 class="text-h6">
-                {{ kFormatter(props.userData.projectDone) }}
+              <h6 class="text-body-1 font-weight-medium">
+                {{ props.userData.zone }}
               </h6>
-              <span>Project Done</span>
+              <span class="text-sm">구역</span>
             </div>
           </div>
         </VCardText>
 
         <!-- 👉 Details -->
-        <VCardText>
-          <h6 class="text-h6">
-            Details
+        <VCardText class="pt-2 pb-4">
+          <h6 class="text-body-1 font-weight-bold">
+            기본 정보
           </h6>
 
           <VDivider class="mt-4" />
 
-          <!-- 👉 User Details list -->
-          <VList class="card-list mt-2">
+          <!-- 👉 성도 상세 리스트 -->
+          <VList
+            class="card-list mt-3"
+            density="compact"
+          >
             <VListItem>
               <VListItemTitle>
                 <h6 class="text-sm font-weight-medium">
-                  Username:
+                  이름:
                   <span class="text-body-2">
-                    @{{ props.userData.username }}
+                    {{ props.userData.fullName }}
                   </span>
                 </h6>
               </VListItemTitle>
@@ -182,8 +162,8 @@ const resolveUserRoleVariant = role => {
             <VListItem>
               <VListItemTitle>
                 <h6 class="text-sm font-weight-medium">
-                  Billing Email:
-                  <span class="text-body-2">{{ props.userData.email }}</span>
+                  전화번호:
+                  <span class="text-body-2">{{ props.userData.phone || '-' }}</span>
                 </h6>
               </VListItemTitle>
             </VListItem>
@@ -191,16 +171,8 @@ const resolveUserRoleVariant = role => {
             <VListItem>
               <VListItemTitle>
                 <h6 class="text-sm font-weight-medium">
-                  Status:
-
-                  <VChip
-                    label
-                    size="small"
-                    :color="resolveUserStatusVariant(props.userData.status)"
-                    class="text-capitalize"
-                  >
-                    {{ props.userData.status }}
-                  </VChip>
+                  성별:
+                  <span class="text-body-2">{{ props.userData.gender || '-' }}</span>
                 </h6>
               </VListItemTitle>
             </VListItem>
@@ -208,8 +180,8 @@ const resolveUserRoleVariant = role => {
             <VListItem>
               <VListItemTitle>
                 <h6 class="text-sm font-weight-medium">
-                  Role:
-                  <span class="text-capitalize text-body-2">{{ props.userData.role }}</span>
+                  생년월일:
+                  <span class="text-body-2">{{ props.userData.birthDate || '-' }}</span>
                 </h6>
               </VListItemTitle>
             </VListItem>
@@ -217,10 +189,8 @@ const resolveUserRoleVariant = role => {
             <VListItem>
               <VListItemTitle>
                 <h6 class="text-sm font-weight-medium">
-                  Tax ID:
-                  <span class="text-body-2">
-                    {{ props.userData.taxId }}
-                  </span>
+                  구원일:
+                  <span class="text-body-2">{{ props.userData.salvationDate || '-' }}</span>
                 </h6>
               </VListItemTitle>
             </VListItem>
@@ -228,8 +198,8 @@ const resolveUserRoleVariant = role => {
             <VListItem>
               <VListItemTitle>
                 <h6 class="text-sm font-weight-medium">
-                  Contact:
-                  <span class="text-body-2">{{ props.userData.contact }}</span>
+                  차량:
+                  <span class="text-body-2">{{ props.userData.vehicle || '-' }}</span>
                 </h6>
               </VListItemTitle>
             </VListItem>
@@ -237,146 +207,56 @@ const resolveUserRoleVariant = role => {
             <VListItem>
               <VListItemTitle>
                 <h6 class="text-sm font-weight-medium">
-                  Language:
-                  <span class="text-body-2">{{ props.userData.language }}</span>
-                </h6>
-              </VListItemTitle>
-            </VListItem>
-
-            <VListItem>
-              <VListItemTitle>
-                <h6 class="text-sm font-weight-medium">
-                  Country:
-                  <span class="text-body-2">{{ props.userData.country }}</span>
+                  회:
+                  <span class="text-body-2">{{ props.userData.group || '-' }}</span>
                 </h6>
               </VListItemTitle>
             </VListItem>
           </VList>
         </VCardText>
 
-        <!-- 👉 Edit and Suspend button -->
-        <VCardText class="d-flex justify-center">
+        <!-- 👉 수정 버튼 -->
+        <VSpacer />
+        <VCardText class="d-flex justify-center pt-2 pb-6">
           <VBtn
             variant="elevated"
             class="me-3"
-            @click="isUserInfoEditDialogVisible = true"
+            @click="emit('edit')"
           >
-            Edit
+            수정
           </VBtn>
           <VBtn
             variant="tonal"
-            color="error"
+            color="secondary"
+            :to="{ name: 'apps-user-list' }"
           >
-            Suspend
+            목록으로
           </VBtn>
         </VCardText>
-      </VCard>
-    </VCol>
-    <!-- !SECTION -->
-
-    <!-- SECTION Current Plan -->
-    <VCol cols="12">
-      <VCard
-        flat
-        class="current-plan"
-      >
-        <VCardText class="d-flex">
-          <!-- 👉 Standard Chip -->
-          <VChip
-            label
-            color="primary"
-            size="small"
-          >
-            Standard
-          </VChip>
-
-          <VSpacer />
-
-          <!-- 👉 Current Price  -->
-          <div class="d-flex align-center">
-            <sup class="text-primary text-sm font-weight-regular">$</sup>
-            <h3 class="text-h3 text-primary font-weight-medium">
-              99
-            </h3>
-            <sub class="mt-3"><h6 class="text-sm font-weight-regular">/ month</h6></sub>
-          </div>
-        </VCardText>
-
-        <VCardText>
-          <!-- 👉 Price Benefits -->
-          <VList class="card-list">
-            <VListItem
-              v-for="benefit in standardPlan.benefits"
-              :key="benefit"
-            >
-              <VIcon
-                size="10"
-                color="#E0E0E0"
-                class="me-2"
-                icon="mdi-checkbox-blank-circle"
-              />
-              <span>{{ benefit }}</span>
-            </VListItem>
-          </VList>
-
-          <!-- 👉 Days -->
-          <div class="my-6">
-            <div class="d-flex mt-3 mb-2">
-              <h6 class="text-sm font-weight-medium">
-                Days
-              </h6>
-              <VSpacer />
-              <h6 class="text-sm font-weight-medium">
-                26 of 30 Days
-              </h6>
-            </div>
-
-            <!-- 👉 Progress -->
-            <VProgressLinear
-              rounded
-              :model-value="86"
-              height="8"
-              color="primary"
-            />
-
-            <p class="text-xs mt-2">
-              4 days remaining
-            </p>
-          </div>
-
-          <!-- 👉 Upgrade Plan -->
-          <VBtn
-            block
-            @click="isUpgradePlanDialogVisible = true"
-          >
-            Upgrade Plan
-          </VBtn>
-        </VCardText>
-      </VCard>
-    </VCol>
-    <!-- !SECTION -->
-  </VRow>
-
-  <!-- 👉 Edit user info dialog -->
-  <UserInfoEditDialog
-    v-model:isDialogVisible="isUserInfoEditDialogVisible"
-    :user-data="props.userData"
-  />
-
-  <!-- 👉 Upgrade plan dialog -->
-  <UserUpgradePlanDialog v-model:isDialogVisible="isUpgradePlanDialogVisible" />
+  </VCard>
 </template>
 
 <style lang="scss" scoped>
 .card-list {
-  --v-card-list-gap: 0.8rem;
-}
-
-.current-plan {
-  border: 2px solid rgb(var(--v-theme-primary));
+  --v-card-list-gap: 0.5rem;
 }
 
 .text-capitalize {
   text-transform: capitalize !important;
+}
+
+.avatar-upload-wrapper {
+  .avatar-upload-overlay {
+    position: absolute;
+    inset: 0;
+    border-radius: 4px;
+    background-color: rgba(0, 0, 0, 0.4);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+
+  &:hover .avatar-upload-overlay {
+    opacity: 1;
+  }
 }
 </style>

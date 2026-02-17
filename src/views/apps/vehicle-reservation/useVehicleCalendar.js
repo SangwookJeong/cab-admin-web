@@ -2,6 +2,7 @@ import dayGridPlugin from '@fullcalendar/daygrid'
 import interactionPlugin from '@fullcalendar/interaction'
 import listPlugin from '@fullcalendar/list'
 import timeGridPlugin from '@fullcalendar/timegrid'
+import koLocale from '@fullcalendar/core/locales/ko'
 import { useThemeConfig } from '@core/composable/useThemeConfig'
 import { useVehicleReservationStore } from '@/views/apps/vehicle-reservation/useVehicleReservationStore'
 
@@ -35,7 +36,7 @@ export const useVehicleCalendar = (event, isEventHandlerSidebarActive, isLeftSid
   const getVehicleName = resourceId => {
     const vehicle = store.vehicles.find(v => v.id === resourceId)
 
-    return vehicle ? vehicle.name : ''
+    return vehicle ? `${vehicle.vehicleColor} ${vehicle.type} ${vehicle.licensePlate}` : ''
   }
 
   const extractEventDataFromEventApi = eventApi => {
@@ -145,21 +146,24 @@ export const useVehicleCalendar = (event, isEventHandlerSidebarActive, isLeftSid
 
   const calendarOptions = {
     plugins: [dayGridPlugin, interactionPlugin, timeGridPlugin, listPlugin],
-    initialView: 'timeGridWeek',
+    initialView: 'dayGridMonth',
     headerToolbar: {
       start: 'drawerToggler,prev,next title',
-      end: 'timeGridWeek,timeGridDay,listMonth',
+      end: 'dayGridMonth,timeGridWeek,timeGridDay,listMonth',
     },
     events: fetchEvents,
     forceEventDuration: true,
     editable: true,
     eventResizableFromStart: true,
     dragScroll: true,
-    navLinks: true,
-    slotMinTime: '06:00:00',
-    slotMaxTime: '22:00:00',
-    allDaySlot: false,
-    locale: 'ko',
+    dayMaxEvents: 2,
+    locale: koLocale,
+    buttonText: {
+      month: '월',
+      week: '주',
+      day: '일',
+      list: '목록',
+    },
     eventClassNames({ event: calendarEvent }) {
       const colorName = getVehicleColor(calendarEvent._def.extendedProps.resourceId)
 
