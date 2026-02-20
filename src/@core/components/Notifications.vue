@@ -57,18 +57,9 @@ const emit = defineEmits(['click:readAllNotifications'])
           <!-- 👉 Header -->
           <VCardItem class="notification-section">
             <VCardTitle class="text-base">
-              Notifications
+              알림
             </VCardTitle>
 
-            <template #append>
-              <VChip
-                v-if="props.notifications.length"
-                color="primary"
-                size="small"
-              >
-                {{ props.notifications.length }} New
-              </VChip>
-            </template>
           </VCardItem>
 
           <VDivider />
@@ -118,7 +109,7 @@ const emit = defineEmits(['click:readAllNotifications'])
               block
               @click="$emit('click:readAllNotifications')"
             >
-              READ ALL NOTIFICATIONS
+              확인
             </VBtn>
           </VCardText>
         </VCard>

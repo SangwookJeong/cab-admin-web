@@ -91,7 +91,7 @@ const avatarBadgeProps = {
           <VDivider class="my-2" />
 
           <!-- 👉 Profile -->
-          <VListItem :to="{ name: 'apps-user-view-id', params: { id: 21 } }">
+          <VListItem :to="{ name: 'pages-account-management' }">
             <template #prepend>
               <VIcon
                 class="me-2"
@@ -100,47 +100,11 @@ const avatarBadgeProps = {
               />
             </template>
 
-            <VListItemTitle>Profile</VListItemTitle>
+            <VListItemTitle>내 정보</VListItemTitle>
           </VListItem>
 
-          <!-- 👉 Settings -->
-          <VListItem :to="{ name: 'pages-account-settings-tab', params: { tab: 'account' } }">
-            <template #prepend>
-              <VIcon
-                class="me-2"
-                icon="mdi-cog-outline"
-                size="22"
-              />
-            </template>
 
-            <VListItemTitle>Settings</VListItemTitle>
-          </VListItem>
-
-          <!-- 👉 Pricing -->
-          <VListItem :to="{ name: 'pages-pricing' }">
-            <template #prepend>
-              <VIcon
-                class="me-2"
-                icon="mdi-currency-usd"
-                size="22"
-              />
-            </template>
-
-            <VListItemTitle>Pricing</VListItemTitle>
-          </VListItem>
-
-          <!-- 👉 FAQ -->
-          <VListItem :to="{ name: 'pages-faq' }">
-            <template #prepend>
-              <VIcon
-                class="me-2"
-                icon="mdi-help-circle-outline"
-                size="22"
-              />
-            </template>
-
-            <VListItemTitle>FAQ</VListItemTitle>
-          </VListItem>
+          <!-- 👉 FAQ (추후 오픈 예정) -->
 
           <!-- Divider -->
           <VDivider class="my-2" />
@@ -158,7 +122,7 @@ const avatarBadgeProps = {
               />
             </template>
 
-            <VListItemTitle>Logout</VListItemTitle>
+            <VListItemTitle>로그아웃</VListItemTitle>
           </VListItem>
         </VList>
       </VMenu>

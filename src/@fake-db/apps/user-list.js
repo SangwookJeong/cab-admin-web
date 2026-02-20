@@ -20,8 +20,11 @@ const users = [
     address2: '현대아파트 101동 502호',
     district: '1교구',
     zone: '1구역',
-    group: '1회',
+    group: '봉사회',
     vehicle: '있음',
+    vehicleType: '쏘나타',
+    vehicleColor: '흰색',
+    vehicleNumber: '12가 3456',
     family: [2, 5],
     memo: '찬양팀 리더',
     photo: avatar1,
@@ -37,8 +40,11 @@ const users = [
     address2: '삼성래미안 203동 1201호',
     district: '1교구',
     zone: '2구역',
-    group: '1회',
+    group: '어머니회',
     vehicle: '없음',
+    vehicleType: '',
+    vehicleColor: '',
+    vehicleNumber: '',
     family: [1],
     memo: '주일학교 교사',
     photo: avatar2,
@@ -54,8 +60,11 @@ const users = [
     address2: 'e편한세상 305동 801호',
     district: '2교구',
     zone: '1구역',
-    group: '2회',
+    group: '은빛장년회',
     vehicle: '있음',
+    vehicleType: '그랜저',
+    vehicleColor: '검정',
+    vehicleNumber: '34나 7890',
     family: [7],
     memo: '장로',
     photo: avatar3,
@@ -71,8 +80,11 @@ const users = [
     address2: '힐스테이트 102동 301호',
     district: '2교구',
     zone: '2구역',
-    group: '1회',
+    group: '청년회',
     vehicle: '없음',
+    vehicleType: '',
+    vehicleColor: '',
+    vehicleNumber: '',
     family: [],
     memo: '',
     photo: avatar4,
@@ -88,8 +100,11 @@ const users = [
     address2: '자이아파트 401동 1502호',
     district: '3교구',
     zone: '1구역',
-    group: '1회',
+    group: '어머니회',
     vehicle: '있음',
+    vehicleType: '투싼',
+    vehicleColor: '은색',
+    vehicleNumber: '56다 1234',
     family: [6],
     memo: '권사, 여전도회 회장',
     photo: avatar5,
@@ -105,8 +120,11 @@ const users = [
     address2: '래미안 501동 601호',
     district: '3교구',
     zone: '2구역',
-    group: '2회',
+    group: '봉사회',
     vehicle: '있음',
+    vehicleType: '카니발',
+    vehicleColor: '검정',
+    vehicleNumber: '78라 5678',
     family: [5],
     memo: '집사, 주차봉사',
     photo: avatar6,
@@ -122,8 +140,11 @@ const users = [
     address2: '푸르지오 202동 901호',
     district: '1교구',
     zone: '3구역',
-    group: '1회',
+    group: '어머니회',
     vehicle: '없음',
+    vehicleType: '',
+    vehicleColor: '',
+    vehicleNumber: '',
     family: [3],
     memo: '성경공부 인도자',
     photo: avatar7,
@@ -139,8 +160,11 @@ const users = [
     address2: '아이파크 103동 1101호',
     district: '2교구',
     zone: '3구역',
-    group: '2회',
+    group: '은빛장년회',
     vehicle: '있음',
+    vehicleType: '아반떼',
+    vehicleColor: '파랑',
+    vehicleNumber: '90마 9012',
     family: [9],
     memo: '안수집사',
     photo: avatar8,
@@ -156,8 +180,11 @@ const users = [
     address2: '센트럴파크 701동 402호',
     district: '3교구',
     zone: '3구역',
-    group: '1회',
+    group: '청년회',
     vehicle: '없음',
+    vehicleType: '',
+    vehicleColor: '',
+    vehicleNumber: '',
     family: [8],
     memo: '청년부',
     photo: avatar1,
@@ -173,8 +200,11 @@ const users = [
     address2: '광교호반써밋 201동 1801호',
     district: '1교구',
     zone: '1구역',
-    group: '2회',
+    group: '봉사회',
     vehicle: '있음',
+    vehicleType: 'K5',
+    vehicleColor: '흰색',
+    vehicleNumber: '23바 4567',
     family: [],
     memo: '집사, 미디어팀',
     photo: avatar2,
@@ -192,17 +222,20 @@ function resolveFamilyMembers(familyIds) {
 }
 
 mock.onGet('/apps/users/list').reply(config => {
-  const { q = '', options = {}, gender = null, district = null } = config.params ?? {}
+  const { q = '', options = {}, gender = null, district = null, zone = null, group = null } = config.params ?? {}
   const { sortBy = '', itemsPerPage = 10, page = 1 } = options
 
   const queryLowered = q.toLowerCase()
   const filteredData = users
     .filter(user =>
       user.fullName.toLowerCase().includes(queryLowered) ||
-      user.phone.includes(queryLowered),
+      user.phone.includes(queryLowered) ||
+      (user.vehicleNumber && user.vehicleNumber.includes(queryLowered)),
     )
     .filter(user => (gender !== null ? user.gender === gender : true))
     .filter(user => (district !== null ? user.district === district : true))
+    .filter(user => (zone !== null ? user.zone === zone : true))
+    .filter(user => (group !== null ? user.group === group : true))
 
   const sortedData = filteredData.sort((a, b) => {
     if (sortBy === 'fullName')
@@ -227,6 +260,30 @@ mock.onGet('/apps/users/list').reply(config => {
       totalUsers,
     },
   ]
+})
+
+// 대시보드 통계
+mock.onGet('/apps/dashboard/stats').reply(() => {
+  const totalMembers = users.length
+
+  // 1교구 ~ 14교구 전체 표시
+  const allDistricts = Array.from({ length: 14 }, (_, i) => `${i + 1}교구`)
+  const districtStats = allDistricts.map(name => ({
+    name,
+    count: users.filter(u => u.district === name).length,
+  }))
+
+  const groupNames = [...new Set(users.map(u => u.group))].sort()
+  const groupStats = groupNames.map(name => ({
+    name,
+    count: users.filter(u => u.group === name).length,
+  }))
+
+  return [200, {
+    stats: { totalMembers },
+    districtStats,
+    groupStats,
+  }]
 })
 
 // 전체 성도 목록 (가족 선택용, id/fullName/phone/photo 만 반환)

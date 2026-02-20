@@ -7,6 +7,8 @@ const userListStore = useUserListStore()
 const searchQuery = ref('')
 const selectedGender = ref()
 const selectedDistrict = ref()
+const selectedGroup = ref()
+const selectedZone = ref()
 const rowPerPage = ref(10)
 const currentPage = ref(1)
 const totalPage = ref(1)
@@ -19,6 +21,8 @@ const fetchUsers = () => {
     q: searchQuery.value,
     gender: selectedGender.value,
     district: selectedDistrict.value,
+    group: selectedGroup.value,
+    zone: selectedZone.value,
     perPage: rowPerPage.value,
     currentPage: currentPage.value,
   }).then(response => {
@@ -38,17 +42,32 @@ watchEffect(() => {
     currentPage.value = totalPage.value
 })
 
-// 👉 search filters
-const genders = [
-  { title: '남', value: '남' },
-  { title: '여', value: '여' },
-]
+// 👉 교구 변경 시 구역 초기화
+watch(selectedDistrict, () => {
+  selectedZone.value = undefined
+})
 
-const districts = [
-  { title: '1교구', value: '1교구' },
-  { title: '2교구', value: '2교구' },
-  { title: '3교구', value: '3교구' },
-]
+// 👉 filter definitions
+const filterDefs = computed(() => [
+  { key: 'gender', label: '성별', icon: 'mdi-gender-male-female', items: ['남', '여'], disabled: false },
+  { key: 'district', label: '교구', icon: 'mdi-church', items: ['1교구', '2교구', '3교구'], disabled: false },
+  { key: 'zone', label: '구역', icon: 'mdi-account-group-outline', items: ['1구역', '2구역', '3구역'], disabled: !selectedDistrict.value },
+  { key: 'group', label: '회', icon: 'mdi-account-multiple', items: ['은빛장년회', '어머니회', '봉사회', '청년회'], disabled: false },
+])
+
+const filterModels = { gender: selectedGender, district: selectedDistrict, zone: selectedZone, group: selectedGroup }
+
+const activeFilters = computed(() =>
+  filterDefs.value.filter(f => filterModels[f.key].value != null),
+)
+
+const clearFilter = key => {
+  filterModels[key].value = undefined
+}
+
+const clearAllFilters = () => {
+  Object.values(filterModels).forEach(m => { m.value = undefined })
+}
 
 const isAddNewUserDrawerVisible = ref(false)
 
@@ -104,50 +123,118 @@ const deleteUser = id => {
     fetchUsers()
   })
 }
+
+const deleteSelectedUsers = () => {
+  const ids = selectedRows.value.map(checkId => Number(checkId.replace('check', '')))
+
+  Promise.all(ids.map(id => userListStore.deleteUser(id))).then(() => {
+    selectedRows.value = []
+    fetchUsers()
+  })
+}
 </script>
 
 <template>
   <section>
-    <VCard
-      title="필터"
-      class="mb-6"
-    >
-      <VCardText>
-        <VRow>
-          <!-- 👉 성별 필터 -->
-          <VCol
-            cols="12"
-            sm="6"
-          >
-            <VSelect
-              v-model="selectedGender"
-              label="성별"
-              :items="genders"
-              clearable
-              clear-icon="mdi-close"
-            />
-          </VCol>
-
-          <!-- 👉 교구 필터 -->
-          <VCol
-            cols="12"
-            sm="6"
-          >
-            <VSelect
-              v-model="selectedDistrict"
-              label="교구"
-              :items="districts"
-              clearable
-              clear-icon="mdi-close"
-            />
-          </VCol>
-        </VRow>
-      </VCardText>
-    </VCard>
-
     <VCard>
-      <VCardText class="d-flex flex-wrap gap-4">
-        <!-- 👉 내보내기 버튼 -->
+      <!-- 👉 검색바 + 필터 칩 + 버튼 -->
+      <VCardText class="d-flex flex-wrap align-center gap-3">
+        <VTextField
+          v-model="searchQuery"
+          placeholder="이름, 전화번호, 차량번호 검색"
+          density="compact"
+          prepend-inner-icon="mdi-magnify"
+          style="max-inline-size: 16rem;"
+          hide-details
+        />
+
+        <VDivider
+          vertical
+          class="mx-1"
+          style="block-size: 1.5rem;"
+        />
+
+        <!-- 👉 필터 칩 -->
+        <template
+          v-for="filter in filterDefs"
+          :key="filter.key"
+        >
+          <!-- 선택된 필터 -->
+          <VChip
+            v-if="filterModels[filter.key].value"
+            closable
+            color="primary"
+            size="small"
+            @click:close="clearFilter(filter.key)"
+          >
+            <template #prepend>
+              <VIcon
+                :icon="filter.icon"
+                size="16"
+                class="me-1"
+              />
+            </template>
+            {{ filter.label }}: {{ filterModels[filter.key].value }}
+          </VChip>
+
+          <!-- 미선택 필터 -->
+          <VMenu
+            v-else
+            location="bottom start"
+          >
+            <template #activator="{ props: menuProps }">
+              <VChip
+                v-bind="menuProps"
+                variant="outlined"
+                size="small"
+                :disabled="filter.disabled"
+                :append-icon="filter.disabled ? undefined : 'mdi-chevron-down'"
+              >
+                <template #prepend>
+                  <VIcon
+                    :icon="filter.icon"
+                    size="16"
+                    class="me-1"
+                  />
+                </template>
+                {{ filter.label }}
+              </VChip>
+            </template>
+
+            <VList density="compact">
+              <VListItem
+                v-for="item in filter.items"
+                :key="item"
+                :title="item"
+                @click="filterModels[filter.key].value = item"
+              />
+            </VList>
+          </VMenu>
+        </template>
+
+        <!-- 전체 해제 -->
+        <VChip
+          v-if="activeFilters.length"
+          variant="text"
+          size="small"
+          color="error"
+          @click="clearAllFilters"
+        >
+          필터 초기화
+        </VChip>
+
+        <VSpacer />
+
+        <VBtn
+          v-if="selectedRows.length"
+          variant="tonal"
+          color="error"
+          prepend-icon="mdi-delete-outline"
+          @click="deleteSelectedUsers"
+        >
+          선택 삭제 ({{ selectedRows.length }})
+        </VBtn>
+
         <VBtn
           variant="tonal"
           color="secondary"
@@ -156,22 +243,9 @@ const deleteUser = id => {
           내보내기
         </VBtn>
 
-        <VSpacer />
-
-        <div class="app-user-search-filter d-flex align-center">
-          <!-- 👉 검색 -->
-          <VTextField
-            v-model="searchQuery"
-            placeholder="성도 검색"
-            density="compact"
-            class="me-3"
-          />
-
-          <!-- 👉 성도 등록 버튼 -->
-          <VBtn @click="isAddNewUserDrawerVisible = true">
-            성도 등록
-          </VBtn>
-        </div>
+        <VBtn @click="isAddNewUserDrawerVisible = true">
+          성도 등록
+        </VBtn>
       </VCardText>
 
       <VDivider />
@@ -202,7 +276,16 @@ const deleteUser = id => {
               구역
             </th>
             <th scope="col">
+              회
+            </th>
+            <th scope="col">
               생년월일
+            </th>
+            <th scope="col">
+              구원일
+            </th>
+            <th scope="col">
+              차량정보
             </th>
             <th scope="col">
               관리
@@ -272,9 +355,34 @@ const deleteUser = id => {
               {{ user.zone }}
             </td>
 
+            <!-- 👉 회 -->
+            <td>
+              {{ user.group }}
+            </td>
+
             <!-- 👉 생년월일 -->
             <td>
               {{ user.birthDate }}
+            </td>
+
+            <!-- 👉 구원일 -->
+            <td>
+              {{ user.salvationDate || '-' }}
+            </td>
+
+            <!-- 👉 차량정보 -->
+            <td>
+              <div
+                v-if="user.vehicleNumber"
+                class="d-flex flex-column"
+              >
+                <span class="text-sm font-weight-medium">{{ user.vehicleNumber }}</span>
+                <span class="text-xs text-medium-emphasis">{{ [user.vehicleColor, user.vehicleType].filter(Boolean).join(' ') }}</span>
+              </div>
+              <span
+                v-else
+                class="text-disabled"
+              >-</span>
             </td>
 
             <!-- 👉 관리 -->
@@ -329,7 +437,7 @@ const deleteUser = id => {
         <tfoot v-show="!users.length">
           <tr>
             <td
-              colspan="7"
+              colspan="10"
               class="text-center"
             >
               데이터가 없습니다
@@ -382,14 +490,6 @@ const deleteUser = id => {
 </template>
 
 <style lang="scss">
-.app-user-search-filter {
-  inline-size: 24.0625rem;
-}
-
-.text-capitalize {
-  text-transform: capitalize;
-}
-
 .user-list-name:not(:hover) {
   color: rgba(var(--v-theme-on-background), var(--v-high-emphasis-opacity));
 }

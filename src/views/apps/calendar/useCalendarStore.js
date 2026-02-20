@@ -3,13 +3,13 @@ import axios from '@axios'
 export const useCalendarStore = defineStore('calendar', {
   state: () => ({
     availableCalendars: [
-      { color: 'error', label: '개인' },
-      { color: 'primary', label: '업무' },
-      { color: 'warning', label: '가족' },
-      { color: 'success', label: '휴일' },
-      { color: 'info', label: '기타' },
+      { color: 'primary', label: '예배' },
+      { color: 'info', label: '교육' },
+      { color: 'warning', label: '행사' },
+      { color: 'success', label: '공지' },
+      { color: 'secondary', label: '기타' },
     ],
-    selectedCalendars: ['개인', '업무', '가족', '휴일', '기타'],
+    selectedCalendars: ['예배', '교육', '행사', '공지', '기타'],
   }),
   actions: {
     addCalendarCategory(category) {

@@ -135,7 +135,7 @@ onBeforeUnmount(() => {
           :items="rooms"
           item-value="id"
           item-title="name"
-          placeholder="회의실 선택"
+          placeholder="상담실 선택"
           hide-details
           density="compact"
           class="room-selector"

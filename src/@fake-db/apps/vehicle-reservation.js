@@ -17,67 +17,67 @@ const data = {
   events: [
     {
       id: '1',
-      title: '고객사 방문',
-      start: new Date(y, m, d, 9, 0).toISOString(),
-      end: new Date(y, m, d, 12, 0).toISOString(),
-      allDay: false,
-      extendedProps: { resourceType: 'vehicle', resourceId: 'vehicle-1', booker: '김민준', destination: '강남 A사', description: '프로젝트 미팅' },
-    },
-    {
-      id: '2',
-      title: '공항 픽업',
-      start: new Date(y, m, d, 14, 0).toISOString(),
-      end: new Date(y, m, d, 17, 0).toISOString(),
-      allDay: false,
-      extendedProps: { resourceType: 'vehicle', resourceId: 'vehicle-3', booker: '이서연', destination: '인천공항', description: '해외 파트너 픽업' },
-    },
-    {
-      id: '3',
-      title: '세미나 참석',
-      start: new Date(y, m, d, 8, 0).toISOString(),
-      end: new Date(y, m, d, 18, 0).toISOString(),
-      allDay: false,
-      extendedProps: { resourceType: 'vehicle', resourceId: 'vehicle-4', booker: '정하늘', destination: '코엑스', description: 'IT 세미나 참석 (4인)' },
-    },
-    {
-      id: '4',
-      title: '거래처 미팅',
-      start: new Date(y, m, d, 10, 0).toISOString(),
-      end: new Date(y, m, d, 12, 0).toISOString(),
-      allDay: false,
-      extendedProps: { resourceType: 'vehicle', resourceId: 'vehicle-2', booker: '박지호', destination: '판교 B사', description: '' },
-    },
-    {
-      id: '5',
-      title: '본사 출장',
-      start: new Date(y, m, d, 13, 0).toISOString(),
-      end: new Date(y, m, d, 17, 0).toISOString(),
-      allDay: false,
-      extendedProps: { resourceType: 'vehicle', resourceId: 'vehicle-2', booker: '최수아', destination: '부산 본사', description: '분기 보고' },
-    },
-    {
-      id: '6',
-      title: '장비 운송',
-      start: new Date(y, m, d, 9, 0).toISOString(),
-      end: new Date(y, m, d, 11, 0).toISOString(),
-      allDay: false,
-      extendedProps: { resourceType: 'vehicle', resourceId: 'vehicle-5', booker: '김민준', destination: '대전 데이터센터', description: '서버 장비 운송' },
-    },
-    {
-      id: '7',
-      title: '현장 점검',
-      start: new Date(y, m, d + 1, 9, 0).toISOString(),
-      end: new Date(y, m, d + 1, 15, 0).toISOString(),
-      allDay: false,
-      extendedProps: { resourceType: 'vehicle', resourceId: 'vehicle-6', booker: '이서연', destination: '수원 공장', description: '분기별 현장 점검' },
-    },
-    {
-      id: '8',
-      title: '협력사 방문',
+      title: '성도 심방',
       start: new Date(y, m, d + 1, 10, 0).toISOString(),
       end: new Date(y, m, d + 1, 13, 0).toISOString(),
       allDay: false,
-      extendedProps: { resourceType: 'vehicle', resourceId: 'vehicle-1', booker: '박지호', destination: '일산 C사', description: '' },
+      extendedProps: { resourceType: 'vehicle', resourceId: 'vehicle-1', booker: '김민준', destination: '수원시 팔달구', description: '교구 심방' },
+    },
+    {
+      id: '2',
+      title: '공항 영접',
+      start: new Date(y, m, d + 1, 14, 0).toISOString(),
+      end: new Date(y, m, d + 1, 17, 0).toISOString(),
+      allDay: false,
+      extendedProps: { resourceType: 'vehicle', resourceId: 'vehicle-3', booker: '이서연', destination: '인천공항', description: '선교사 영접' },
+    },
+    {
+      id: '3',
+      title: '연합 집회 이동',
+      start: new Date(y, m, d + 2, 8, 0).toISOString(),
+      end: new Date(y, m, d + 2, 18, 0).toISOString(),
+      allDay: false,
+      extendedProps: { resourceType: 'vehicle', resourceId: 'vehicle-4', booker: '박지호', destination: '서울 올림픽공원', description: '청년 연합집회 (4인)' },
+    },
+    {
+      id: '4',
+      title: '장로 회의 이동',
+      start: new Date(y, m, d + 3, 10, 0).toISOString(),
+      end: new Date(y, m, d + 3, 12, 0).toISOString(),
+      allDay: false,
+      extendedProps: { resourceType: 'vehicle', resourceId: 'vehicle-2', booker: '정민서', destination: '총회 본부', description: '' },
+    },
+    {
+      id: '5',
+      title: '선교 봉사 이동',
+      start: new Date(y, m, d + 4, 9, 0).toISOString(),
+      end: new Date(y, m, d + 4, 17, 0).toISOString(),
+      allDay: false,
+      extendedProps: { resourceType: 'vehicle', resourceId: 'vehicle-2', booker: '강도윤', destination: '경기도 노인요양원', description: '노인 봉사 이동' },
+    },
+    {
+      id: '6',
+      title: '물품 운송',
+      start: new Date(y, m, d + 5, 9, 0).toISOString(),
+      end: new Date(y, m, d + 5, 11, 0).toISOString(),
+      allDay: false,
+      extendedProps: { resourceType: 'vehicle', resourceId: 'vehicle-5', booker: '신예준', destination: '교회 창고', description: '예배 물품 운송' },
+    },
+    {
+      id: '7',
+      title: '구역 심방',
+      start: new Date(y, m, d + 6, 14, 0).toISOString(),
+      end: new Date(y, m, d + 6, 18, 0).toISOString(),
+      allDay: false,
+      extendedProps: { resourceType: 'vehicle', resourceId: 'vehicle-6', booker: '윤하은', destination: '수원시 영통구', description: '3구역 심방' },
+    },
+    {
+      id: '8',
+      title: '노약자 차량 봉사',
+      start: new Date(y, m, d + 7, 10, 0).toISOString(),
+      end: new Date(y, m, d + 7, 13, 0).toISOString(),
+      allDay: false,
+      extendedProps: { resourceType: 'vehicle', resourceId: 'vehicle-1', booker: '임시우', destination: '수원시 권선구', description: '' },
     },
   ],
 }
@@ -122,7 +122,7 @@ mock.onDelete(/\/apps\/vehicle-reservation\/vehicles\/[\w-]+/).reply(config => {
 // GET: Return vehicle reservation events
 // ------------------------------------------------
 mock.onGet('/apps/vehicle-reservation/events').reply(config => {
-  const { vehicleIds } = config.params
+  const vehicleIds = config.params?.vehicleIds
   const selectedVehicleIds = vehicleIds ? vehicleIds.split(',') : data.vehicles.map(v => v.id)
 
   return [200, data.events.filter(event => selectedVehicleIds.includes(event.extendedProps.resourceId))]

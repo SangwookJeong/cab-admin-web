@@ -198,8 +198,12 @@ const onPhotoUpload = event => {
             <VListItem>
               <VListItemTitle>
                 <h6 class="text-sm font-weight-medium">
-                  차량:
-                  <span class="text-body-2">{{ props.userData.vehicle || '-' }}</span>
+                  차량정보:
+                  <span class="text-body-2">
+                    {{ props.userData.vehicleNumber
+                      ? [props.userData.vehicleColor, props.userData.vehicleType, props.userData.vehicleNumber].filter(Boolean).join(' ')
+                      : '-' }}
+                  </span>
                 </h6>
               </VListItemTitle>
             </VListItem>

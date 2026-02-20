@@ -7,70 +7,51 @@ import authV2RegisterIllustrationBorderedLight from '@images/pages/auth-v2-regis
 import authV2RegisterIllustrationDark from '@images/pages/auth-v2-register-illustration-dark.png'
 import authV2RegisterIllustrationLight from '@images/pages/auth-v2-register-illustration-light.png'
 import tree2 from '@images/pages/tree-2.png'
-import { useAppAbility } from '@/plugins/casl/useAppAbility'
-import AuthProvider from '@/views/pages/authentication/AuthProvider.vue'
 import axios from '@axios'
 import { useGenerateImageVariant } from '@core/composable/useGenerateImageVariant'
 import { VNodeRenderer } from '@layouts/components/VNodeRenderer'
 import { themeConfig } from '@themeConfig'
-import {
-  alphaDashValidator,
-  emailValidator,
-  requiredValidator,
-} from '@validators'
+import { requiredValidator } from '@validators'
 
 const refVForm = ref()
-const username = ref('johnDoe')
-const email = ref('john@example.com')
-const password = ref('john@MATERIO#123')
-const privacyPolicies = ref(true)
+const email = ref('')
+const fullName = ref('')
+const phone = ref('')
+const password = ref('')
+const passwordConfirm = ref('')
+const isPasswordVisible = ref(false)
+const isPasswordConfirmVisible = ref(false)
+const isSubmitted = ref(false)
+const errorMsg = ref('')
 
-// Router
-const route = useRoute()
-const router = useRouter()
+const passwordMatchValidator = v => v === password.value || '비밀번호가 일치하지 않습니다'
 
-// Ability
-const ability = useAppAbility()
-
-// Form Errors
-const errors = ref({
-  email: undefined,
-  password: undefined,
-})
+const imageVariant = useGenerateImageVariant(
+  authV2RegisterIllustrationLight,
+  authV2RegisterIllustrationDark,
+  authV2RegisterIllustrationBorderedLight,
+  authV2RegisterIllustrationBorderedDark,
+  true,
+)
+const authThemeMask = useGenerateImageVariant(authV2MaskLight, authV2MaskDark)
 
 const register = () => {
-  axios.post('/auth/register', {
-    username: username.value,
+  errorMsg.value = ''
+  axios.post('/auth/pending-registrations', {
     email: email.value,
+    fullName: fullName.value,
+    phone: phone.value,
     password: password.value,
-  }).then(r => {
-    const { accessToken, userData, userAbilities } = r.data
-
-    localStorage.setItem('userAbilities', JSON.stringify(userAbilities))
-    ability.update(userAbilities)
-    localStorage.setItem('userData', JSON.stringify(userData))
-    localStorage.setItem('accessToken', JSON.stringify(accessToken))
-
-    // Redirect to `to` query if exist or redirect to index route
-    router.replace(route.query.to ? String(route.query.to) : '/')
-    
-    return null
+  }).then(() => {
+    isSubmitted.value = true
   }).catch(e => {
-    const { errors: formErrors } = e.response.data
-
-    errors.value = formErrors
-    console.error(e.response.data)
+    errorMsg.value = e.response?.data?.message || '가입 신청 중 오류가 발생했습니다.'
   })
 }
 
-const imageVariant = useGenerateImageVariant(authV2RegisterIllustrationLight, authV2RegisterIllustrationDark, authV2RegisterIllustrationBorderedLight, authV2RegisterIllustrationBorderedDark, true)
-const authThemeMask = useGenerateImageVariant(authV2MaskLight, authV2MaskDark)
-const isPasswordVisible = ref(false)
-
 const onSubmit = () => {
   refVForm.value?.validate().then(({ valid: isValid }) => {
-    if (isValid)
-      register()
+    if (isValid) register()
   })
 }
 </script>
@@ -80,10 +61,6 @@ const onSubmit = () => {
     <!-- Title and Logo -->
     <div class="auth-logo d-flex align-start gap-x-3">
       <VNodeRenderer :nodes="themeConfig.app.logo" />
-
-      <h1 class="font-weight-medium leading-normal text-2xl text-uppercase">
-        {{ themeConfig.app.title }}
-      </h1>
     </div>
 
     <VRow
@@ -94,22 +71,18 @@ const onSubmit = () => {
         lg="8"
         class="d-none d-lg-flex align-center justify-center position-relative"
       >
-        <div
-          class="d-flex align-center justify-center w-100 pa-10 pe-0"
-        >
+        <div class="d-flex align-center justify-center w-100 pa-10 pe-0">
           <VImg
             max-width="768px"
             :src="imageVariant"
             class="auth-illustration"
           />
         </div>
-
         <VImg
           :width="150"
           :src="tree2"
           class="auth-footer-start-tree"
         />
-
         <VImg
           class="auth-footer-mask"
           :src="authThemeMask"
@@ -126,111 +99,133 @@ const onSubmit = () => {
           :max-width="500"
           class="mt-12 mt-sm-0 pa-4"
         >
-          <VCardText>
-            <h5 class="text-h5 mb-1">
-              Adventure starts here 🚀
-            </h5>
-            <p class="mb-0">
-              Make your app management easy and fun!
-            </p>
-          </VCardText>
+          <!-- 👉 신청 완료 상태 -->
+          <template v-if="isSubmitted">
+            <VCardText class="text-center py-10">
+              <VIcon
+                icon="mdi-check-circle-outline"
+                color="success"
+                size="64"
+                class="mb-4"
+              />
+              <h5 class="text-h5 mb-3">
+                가입 신청 완료
+              </h5>
+              <p class="text-medium-emphasis mb-6">
+                관리자의 승인 후 로그인하실 수 있습니다.
+              </p>
+              <VBtn
+                variant="tonal"
+                :to="{ name: 'login' }"
+              >
+                로그인 페이지로
+              </VBtn>
+            </VCardText>
+          </template>
 
-          <VCardText>
-            <VForm
-              ref="refVForm"
-              @submit.prevent="onSubmit"
-            >
-              <VRow>
-                <!-- Username -->
-                <VCol cols="12">
-                  <VTextField
-                    v-model="username"
-                    :rules="[requiredValidator, alphaDashValidator]"
-                    label="Username"
-                  />
-                </VCol>
+          <!-- 👉 가입 신청 폼 -->
+          <template v-else>
+            <VCardText>
+              <h5 class="text-h5 mb-1">
+                회원가입 신청
+              </h5>
+              <p class="mb-0 text-medium-emphasis">
+                관리자 승인 후 로그인이 가능합니다
+              </p>
+            </VCardText>
 
-                <!-- email -->
-                <VCol cols="12">
-                  <VTextField
-                    v-model="email"
-                    :rules="[requiredValidator, emailValidator]"
-                    label="Email"
-                    type="email"
-                  />
-                </VCol>
+            <VCardText>
+              <VAlert
+                v-if="errorMsg"
+                type="error"
+                variant="tonal"
+                class="mb-4"
+              >
+                {{ errorMsg }}
+              </VAlert>
 
-                <!-- password -->
-                <VCol cols="12">
-                  <VTextField
-                    v-model="password"
-                    :rules="[requiredValidator]"
-                    label="Password"
-                    :type="isPasswordVisible ? 'text' : 'password'"
-                    :append-inner-icon="isPasswordVisible ? 'mdi-eye-off-outline' : 'mdi-eye-outline'"
-                    @click:append-inner="isPasswordVisible = !isPasswordVisible"
-                  />
-
-                  <div class="d-flex align-center mt-1 mb-4">
-                    <VCheckbox
-                      id="privacy-policy"
-                      v-model="privacyPolicies"
-                      inline
+              <VForm
+                ref="refVForm"
+                @submit.prevent="onSubmit"
+              >
+                <VRow>
+                  <!-- 계정 -->
+                  <VCol cols="12">
+                    <VTextField
+                      v-model="email"
+                      :rules="[requiredValidator]"
+                      label="계정"
                     />
-                    <VLabel
-                      for="privacy-policy"
-                      class="pb-1"
-                      style="opacity: 1;"
+                  </VCol>
+
+                  <!-- 이름 -->
+                  <VCol cols="12">
+                    <VTextField
+                      v-model="fullName"
+                      :rules="[requiredValidator]"
+                      label="이름"
+                    />
+                  </VCol>
+
+                  <!-- 연락처 -->
+                  <VCol cols="12">
+                    <VTextField
+                      v-model="phone"
+                      label="연락처"
+                      placeholder="010-0000-0000"
+                    />
+                  </VCol>
+
+                  <!-- 비밀번호 -->
+                  <VCol cols="12">
+                    <VTextField
+                      v-model="password"
+                      :rules="[requiredValidator]"
+                      label="비밀번호"
+                      :type="isPasswordVisible ? 'text' : 'password'"
+                      :append-inner-icon="isPasswordVisible ? 'mdi-eye-off-outline' : 'mdi-eye-outline'"
+                      @click:append-inner="isPasswordVisible = !isPasswordVisible"
+                    />
+                  </VCol>
+
+                  <!-- 비밀번호 확인 -->
+                  <VCol cols="12">
+                    <VTextField
+                      v-model="passwordConfirm"
+                      :rules="[requiredValidator, passwordMatchValidator]"
+                      label="비밀번호 확인"
+                      :type="isPasswordConfirmVisible ? 'text' : 'password'"
+                      :append-inner-icon="isPasswordConfirmVisible ? 'mdi-eye-off-outline' : 'mdi-eye-outline'"
+                      @click:append-inner="isPasswordConfirmVisible = !isPasswordConfirmVisible"
+                    />
+                  </VCol>
+
+                  <!-- 버튼 -->
+                  <VCol cols="12">
+                    <VBtn
+                      block
+                      type="submit"
                     >
-                      <span class="me-1">I agree to</span>
-                      <a
-                        href="javascript:void(0)"
-                        class="text-primary"
-                      >privacy policy & terms</a>
-                    </VLabel>
-                  </div>
+                      가입 신청
+                    </VBtn>
+                  </VCol>
 
-                  <VBtn
-                    block
-                    type="submit"
+                  <VCol
+                    cols="12"
+                    class="text-center text-base"
                   >
-                    Sign up
-                  </VBtn>
-                </VCol>
-
-                <!-- create account -->
-                <VCol
-                  cols="12"
-                  class="text-center text-base"
-                >
-                  <span>Already have an account?</span>
-                  <RouterLink
-                    class="text-primary ms-2"
-                    :to="{ name: 'login' }"
-                  >
-                    Sign in instead
-                  </RouterLink>
-                </VCol>
-
-                <VCol
-                  cols="12"
-                  class="d-flex align-center"
-                >
-                  <VDivider />
-                  <span class="mx-4">or</span>
-                  <VDivider />
-                </VCol>
-
-                <!-- auth providers -->
-                <VCol
-                  cols="12"
-                  class="text-center"
-                >
-                  <AuthProvider />
-                </VCol>
-              </VRow>
-            </VForm>
-          </VCardText>
+                    <span>이미 계정이 있으신가요?</span>
+                    <RouterLink
+                      class="text-primary ms-2"
+                      :to="{ name: 'login' }"
+                    >
+                      로그인
+                    </RouterLink>
+                  </VCol>
+                </VRow>
+              </VForm>
+            </VCardText>
+          </template>
         </VCard>
       </VCol>
     </VRow>

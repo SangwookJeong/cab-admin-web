@@ -2,6 +2,42 @@ import avatar1 from '@images/avatars/avatar-1.png'
 import avatar2 from '@images/avatars/avatar-2.png'
 import mock from '@/@fake-db/mock'
 
+// 비밀번호 재설정 요청 목록
+const passwordResetRequests = [
+  {
+    id: 1,
+    account: 'admin@demo.com',
+    fullName: 'John Doe',
+    requestedAt: '2026-02-17',
+  },
+  {
+    id: 2,
+    account: 'client@demo.com',
+    fullName: 'Jane Doe',
+    requestedAt: '2026-02-19',
+  },
+]
+
+// 가입 승인 대기 목록
+const pendingRegistrations = [
+  {
+    id: 1,
+    fullName: '홍길동',
+    email: 'hong',
+    phone: '010-1111-2222',
+    password: 'password123',
+    requestedAt: '2026-02-15',
+  },
+  {
+    id: 2,
+    fullName: '김철수',
+    email: 'kim',
+    phone: '010-3333-4444',
+    password: 'password456',
+    requestedAt: '2026-02-18',
+  },
+]
+
 
 // TODO: Use jsonwebtoken pkg
 // ℹ️ Created from https://jwt.io/ using HS256 algorithm
@@ -47,14 +83,9 @@ const database = [
     email: 'client@demo.com',
     role: 'client',
     abilities: [
-      {
-        action: 'read',
-        subject: 'Auth',
-      },
-      {
-        action: 'read',
-        subject: 'AclDemo',
-      },
+      { action: 'read', subject: 'Auth' },
+      { action: 'manage', subject: 'Member' },
+      { action: 'manage', subject: 'Calendar' },
     ],
   },
 ]
@@ -165,4 +196,187 @@ mock.onPost('/auth/register').reply(request => {
   }
   
   return [400, { error: errors }]
+})
+
+// 계정 목록 조회
+mock.onGet('/auth/accounts').reply(() => {
+  const accounts = database.map(({ id, fullName, username, email, phone, role, avatar }) =>
+    ({ id, fullName, username, email, phone, role, avatar }),
+  )
+
+  return [200, { accounts }]
+})
+
+// 계정 수정
+mock.onPut(/\/auth\/accounts\/\d+/).reply(config => {
+  const id = Number(config.url?.split('/').pop())
+  const { fullName, phone, email, role, password } = JSON.parse(config.data)
+  const user = database.find(u => u.id === id)
+  if (!user) return [404, { message: '계정을 찾을 수 없습니다' }]
+
+  if (fullName) user.fullName = fullName
+  if (phone !== undefined) user.phone = phone
+  if (email) user.email = email
+  if (role) {
+    user.role = role
+    user.abilities = role === 'admin'
+      ? [{ action: 'manage', subject: 'all' }]
+      : [{ action: 'manage', subject: 'all' }]
+  }
+  if (password) user.password = password
+
+  return [200, { user: { id: user.id, fullName: user.fullName, email: user.email, role: user.role } }]
+})
+
+// 계정 삭제
+mock.onDelete(/\/auth\/accounts\/\d+/).reply(config => {
+  const id = Number(config.url?.split('/').pop())
+  const index = database.findIndex(u => u.id === id)
+  if (index > -1) {
+    database.splice(index, 1)
+
+    return [200]
+  }
+
+  return [404, { message: '계정을 찾을 수 없습니다' }]
+})
+
+// 계정 추가
+mock.onPost('/auth/accounts').reply(config => {
+  const { fullName, phone, email, password, role } = JSON.parse(config.data)
+  const isEmailInUse = database.find(u => u.email === email)
+  if (isEmailInUse) return [400, { message: '이미 사용 중인 이메일입니다' }]
+
+  const newUser = {
+    id: database.length ? Math.max(...database.map(u => u.id)) + 1 : 1,
+    fullName,
+    phone: phone || '',
+    username: email.split('@')[0],
+    email,
+    password,
+    role: role || 'client',
+    avatar: '',
+    abilities: [{ action: 'manage', subject: 'all' }],
+  }
+
+  database.push(newUser)
+
+  return [201, { user: { id: newUser.id, fullName: newUser.fullName, email: newUser.email, role: newUser.role } }]
+})
+
+// 가입 신청 제출 (회원가입 페이지에서 호출)
+mock.onPost('/auth/pending-registrations').reply(config => {
+  const { fullName, email, phone, password, role } = JSON.parse(config.data)
+  const isEmailInUse = database.find(u => u.email === email)
+  const isPending = pendingRegistrations.find(u => u.email === email)
+  if (isEmailInUse || isPending)
+    return [400, { message: '이미 사용 중이거나 승인 대기 중인 계정입니다' }]
+
+  const newRequest = {
+    id: pendingRegistrations.length ? Math.max(...pendingRegistrations.map(u => u.id)) + 1 : 1,
+    fullName,
+    email,
+    phone: phone || '',
+    password,
+    role: role || 'client',
+    requestedAt: new Date().toISOString().slice(0, 10),
+  }
+
+  pendingRegistrations.push(newRequest)
+
+  return [201, { message: '가입 신청이 완료되었습니다. 관리자 승인을 기다려주세요.' }]
+})
+
+// 대기 목록 조회
+mock.onGet('/auth/pending-registrations').reply(() => {
+  return [200, { registrations: pendingRegistrations }]
+})
+
+// 승인
+mock.onPost(/\/auth\/pending-registrations\/\d+\/approve/).reply(config => {
+  const id = Number(config.url?.split('/').slice(-2, -1)[0])
+  const index = pendingRegistrations.findIndex(u => u.id === id)
+  if (index === -1) return [404, { message: '신청 내역을 찾을 수 없습니다' }]
+
+  const [request] = pendingRegistrations.splice(index, 1)
+
+  const newUser = {
+    id: database.length ? Math.max(...database.map(u => u.id)) + 1 : 1,
+    fullName: request.fullName,
+    username: request.email,
+    email: request.email,
+    phone: request.phone || '',
+    password: request.password,
+    role: request.role || 'client',
+    avatar: '',
+    abilities: request.role === 'admin'
+      ? [{ action: 'manage', subject: 'all' }]
+      : [{ action: 'read', subject: 'Auth' }, { action: 'manage', subject: 'Member' }, { action: 'manage', subject: 'Calendar' }],
+  }
+
+  database.push(newUser)
+
+  return [200, { message: '승인 완료', user: { id: newUser.id, fullName: newUser.fullName, email: newUser.email, role: newUser.role } }]
+})
+
+// 거절
+mock.onDelete(/\/auth\/pending-registrations\/\d+/).reply(config => {
+  const id = Number(config.url?.split('/').pop())
+  const index = pendingRegistrations.findIndex(u => u.id === id)
+  if (index === -1) return [404, { message: '신청 내역을 찾을 수 없습니다' }]
+
+  pendingRegistrations.splice(index, 1)
+
+  return [200, { message: '거절 완료' }]
+})
+
+// 비밀번호 재설정 요청 제출
+mock.onPost('/auth/password-reset-requests').reply(config => {
+  const { account } = JSON.parse(config.data)
+  const user = database.find(u => u.email === account)
+  if (!user) return [404, { message: '존재하지 않는 계정입니다' }]
+
+  const already = passwordResetRequests.find(r => r.account === account)
+  if (already) return [400, { message: '이미 재설정 요청이 접수되어 있습니다' }]
+
+  passwordResetRequests.push({
+    id: passwordResetRequests.length ? Math.max(...passwordResetRequests.map(r => r.id)) + 1 : 1,
+    account,
+    fullName: user.fullName,
+    requestedAt: new Date().toISOString().slice(0, 10),
+  })
+
+  return [201, { message: '재설정 요청이 완료되었습니다' }]
+})
+
+// 비밀번호 재설정 요청 목록 조회
+mock.onGet('/auth/password-reset-requests').reply(() => {
+  return [200, { requests: passwordResetRequests }]
+})
+
+// 비밀번호 재설정 승인 (새 비밀번호 설정)
+mock.onPost(/\/auth\/password-reset-requests\/\d+\/approve/).reply(config => {
+  const id = Number(config.url?.split('/').slice(-2, -1)[0])
+  const { newPassword } = JSON.parse(config.data)
+  const index = passwordResetRequests.findIndex(r => r.id === id)
+  if (index === -1) return [404, { message: '요청을 찾을 수 없습니다' }]
+
+  const request = passwordResetRequests[index]
+  const user = database.find(u => u.email === request.account)
+  if (user) user.password = newPassword
+
+  passwordResetRequests.splice(index, 1)
+
+  return [200, { message: '비밀번호가 재설정되었습니다' }]
+})
+
+// 비밀번호 재설정 거절
+mock.onDelete(/\/auth\/password-reset-requests\/\d+/).reply(config => {
+  const id = Number(config.url?.split('/').pop())
+  const index = passwordResetRequests.findIndex(r => r.id === id)
+  if (index === -1) return [404, { message: '요청을 찾을 수 없습니다' }]
+
+  passwordResetRequests.splice(index, 1)
+
+  return [200, { message: '거절 완료' }]
 })

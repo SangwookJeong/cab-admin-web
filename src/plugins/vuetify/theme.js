@@ -6,11 +6,11 @@ const theme = {
     light: {
       dark: false,
       colors: {
-        'primary': localStorage.getItem(`${themeConfig.app.title}-lightThemePrimaryColor`) || '#9155FD',
-        'secondary': '#8A8D93',
+        'primary': localStorage.getItem(`${themeConfig.app.title}-lightThemePrimaryColor`) || '#093678',
+        'secondary': '#50B0D1',
         'on-secondary': '#fff',
         'success': '#56CA00',
-        'info': '#16B1FF',
+        'info': '#50B0D1',
         'warning': '#FFB400',
         'error': '#FF4C51',
         'on-primary': '#FFFFFF',
@@ -43,11 +43,11 @@ const theme = {
     dark: {
       dark: true,
       colors: {
-        'primary': localStorage.getItem(`${themeConfig.app.title}-darkThemePrimaryColor`) || '#9155FD',
-        'secondary': '#8A8D93',
+        'primary': localStorage.getItem(`${themeConfig.app.title}-darkThemePrimaryColor`) || '#093678',
+        'secondary': '#50B0D1',
         'on-secondary': '#fff',
         'success': '#56CA00',
-        'info': '#16B1FF',
+        'info': '#50B0D1',
         'warning': '#FFB400',
         'error': '#FF4C51',
         'on-primary': '#FFFFFF',

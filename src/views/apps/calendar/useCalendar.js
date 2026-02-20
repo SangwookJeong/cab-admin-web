@@ -85,11 +85,11 @@ export const useCalendar = (isLeftSidebarOpen) => {
 
   // Calendar colors for regular events
   const calendarsColor = {
-    '업무': 'primary',
-    '휴일': 'success',
-    '개인': 'error',
-    '가족': 'warning',
-    '기타': 'info',
+    '예배': 'primary',
+    '교육': 'info',
+    '행사': 'warning',
+    '공지': 'success',
+    '기타': 'secondary',
   }
 
   // Helpers

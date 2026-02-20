@@ -102,7 +102,7 @@ const endDateTimePickerConfig = computed(() => {
     <VCard>
       <VCardTitle class="d-flex align-center pa-4">
         <span class="text-h6">
-          {{ event.id ? '회의실 예약 수정' : '회의실 예약' }}
+          {{ event.id ? '상담실 예약 수정' : '상담실 예약' }}
         </span>
         <VSpacer />
         <VBtn
@@ -134,7 +134,7 @@ const endDateTimePickerConfig = computed(() => {
           @submit.prevent="handleSubmit"
         >
           <VRow>
-            <!-- 제목 + 회의실 -->
+            <!-- 제목 + 상담실 -->
             <VCol
               cols="12"
               md="7"
@@ -152,7 +152,7 @@ const endDateTimePickerConfig = computed(() => {
             >
               <VSelect
                 v-model="event.extendedProps.resourceId"
-                label="회의실"
+                label="상담실"
                 :rules="[requiredValidator]"
                 :items="store.rooms"
                 item-value="id"

@@ -1,45 +1,43 @@
 <script setup>
 import Notifications from '@core/components/Notifications.vue'
 
-// Images
-import avatar3 from '@images/avatars/avatar-3.png'
-import avatar4 from '@images/avatars/avatar-4.png'
-import avatar5 from '@images/avatars/avatar-5.png'
-import paypal from '@images/svg/paypal.svg'
-
 const notifications = [
   {
-    img: avatar4,
-    title: 'Congratulation Flora! 🎉',
-    subtitle: 'Won the monthly best seller badge',
-    time: 'Today',
+    icon: 'mdi-account-plus-outline',
+    color: 'primary',
+    title: '새 성도 등록',
+    subtitle: '박지수 성도가 새로 등록되었습니다',
+    time: '방금 전',
   },
   {
-    text: 'Tom Holland',
-    title: 'New user registered.',
-    subtitle: '5 hours ago',
-    time: 'Yesterday',
+    icon: 'mdi-car-outline',
+    color: 'info',
+    title: '차량 예약',
+    subtitle: '3월 15일 교회버스 예약이 접수되었습니다',
+    time: '10분 전',
   },
   {
-    img: avatar5,
-    title: 'New message received 👋🏻',
-    subtitle: 'You have 10 unread messages',
-    time: '11 Aug',
+    icon: 'mdi-calendar-plus-outline',
+    color: 'success',
+    title: '새 일정 등록',
+    subtitle: '3월 20일 봄 수련회 일정이 등록되었습니다',
+    time: '1시간 전',
   },
   {
-    img: paypal,
-    title: 'Paypal',
-    subtitle: 'Received Payment',
-    time: '25 May',
+    icon: 'mdi-door-open',
+    color: 'warning',
+    title: '상담실 예약',
+    subtitle: '소상담실 A 3월 16일 14:00 예약이 접수되었습니다',
+    time: '3시간 전',
+  },
+  {
+    icon: 'mdi-account-remove-outline',
     color: 'error',
+    title: '성도 삭제',
+    subtitle: '이민호 성도 정보가 삭제되었습니다',
+    time: '어제',
   },
-  {
-    img: avatar3,
-    title: 'Received Order 📦',
-    subtitle: 'New order received from john',
-    time: '19 Mar',
-  },
-]
+].slice(0, 5)
 </script>
 
 <template>

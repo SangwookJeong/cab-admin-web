@@ -1,16 +1,12 @@
 <script setup>
 import { VForm } from 'vuetify/components'
 import { useAppAbility } from '@/plugins/casl/useAppAbility'
-import AuthProvider from '@/views/pages/authentication/AuthProvider.vue'
 import axios from '@axios'
 import { useGenerateImageVariant } from '@core/composable/useGenerateImageVariant'
 import tree from '@images/pages/tree.png'
 import { VNodeRenderer } from '@layouts/components/VNodeRenderer'
 import { themeConfig } from '@themeConfig'
-import {
-  emailValidator,
-  requiredValidator,
-} from '@validators'
+import { requiredValidator } from '@validators'
 import authV2LoginIllustrationBorderedDark from '@images/pages/auth-v2-login-illustration-bordered-dark.png'
 import authV2LoginIllustrationBorderedLight from '@images/pages/auth-v2-login-illustration-bordered-light.png'
 import authV2LoginIllustrationDark from '@images/pages/auth-v2-login-illustration-dark.png'
@@ -67,15 +63,6 @@ const onSubmit = () => {
 
 <template>
   <div>
-    <!-- Title and Logo -->
-    <div class="auth-logo d-flex align-start gap-x-3">
-      <VNodeRenderer :nodes="themeConfig.app.logo" />
-
-      <h1 class="font-weight-medium leading-normal text-2xl text-uppercase">
-        {{ themeConfig.app.title }}
-      </h1>
-    </div>
-
     <VRow
       no-gutters
       class="auth-wrapper"
@@ -110,27 +97,28 @@ const onSubmit = () => {
           :max-width="500"
           class="mt-12 mt-sm-0 pa-4"
         >
-          <VCardText>
-            <h5 class="text-h5 mb-1">
-              Welcome to {{ themeConfig.app.title }}! 👋🏻
-            </h5>
-            <p class="mb-0">
-              Please sign-in to your account and start the adventure
-            </p>
-          </VCardText>
-          <VCardText>
-            <VAlert
-              color="primary"
-              variant="tonal"
+          <VCardText class="text-center pt-6 pb-10">
+            <img
+              src="/suwon_logo.png"
+              alt="수원교회"
+              style="max-height: 44px; width: auto;"
             >
-              <p class="text-caption mb-2">
-                Admin Email: <strong>admin@demo.com</strong> / Pass: <strong>admin</strong>
-              </p>
-              <p class="text-caption mb-0">
-                Client Email: <strong>client@demo.com</strong> / Pass: <strong>client</strong>
-              </p>
-            </VAlert>
           </VCardText>
+          <!--
+            <VCardText>
+            <VAlert
+            color="primary"
+            variant="tonal"
+            >
+            <p class="text-caption mb-2">
+            Admin Email: <strong>admin@demo.com</strong> / Pass: <strong>admin</strong>
+            </p>
+            <p class="text-caption mb-0">
+            Client Email: <strong>client@demo.com</strong> / Pass: <strong>client</strong>
+            </p>
+            </VAlert>
+            </VCardText> 
+          -->
           <VCardText>
             <VForm
               ref="refVForm"
@@ -141,9 +129,8 @@ const onSubmit = () => {
                 <VCol cols="12">
                   <VTextField
                     v-model="email"
-                    label="Email"
-                    type="email"
-                    :rules="[requiredValidator, emailValidator]"
+                    label="계정"
+                    :rules="[requiredValidator]"
                     :error-messages="errors.email"
                   />
                 </VCol>
@@ -169,7 +156,7 @@ const onSubmit = () => {
                       class="text-primary ms-2 mb-1"
                       :to="{ name: 'forgot-password' }"
                     >
-                      Forgot Password?
+                      비밀번호를 잊었습니까?
                     </RouterLink>
                   </div>
 
@@ -186,29 +173,13 @@ const onSubmit = () => {
                   cols="12"
                   class="text-center"
                 >
-                  <span>New on our platform?</span>
+                  <span>처음 방문하십니까?</span>
                   <RouterLink
                     class="text-primary ms-2"
                     :to="{ name: 'register' }"
                   >
-                    Create an account
+                    계정 생성 요청
                   </RouterLink>
-                </VCol>
-                <VCol
-                  cols="12"
-                  class="d-flex align-center"
-                >
-                  <VDivider />
-                  <span class="mx-4">or</span>
-                  <VDivider />
-                </VCol>
-
-                <!-- auth providers -->
-                <VCol
-                  cols="12"
-                  class="text-center"
-                >
-                  <AuthProvider />
                 </VCol>
               </VRow>
             </VForm>

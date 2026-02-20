@@ -1,5 +1,6 @@
 <script setup>
 import { PerfectScrollbar } from 'vue3-perfect-scrollbar'
+import AppDatePicker from '@core/components/AppDatePicker.vue'
 import { useUserListStore } from '@/views/apps/user/useUserListStore'
 import { avatarText } from '@core/utils/formatters'
 import { requiredValidator } from '@validators'
@@ -28,7 +29,9 @@ const address2 = ref('')
 const district = ref()
 const zone = ref('')
 const group = ref('')
-const vehicle = ref()
+const vehicleType = ref('')
+const vehicleColor = ref('')
+const vehicleNumber = ref('')
 const family = ref([])
 const memo = ref('')
 const allUsers = ref([])
@@ -77,7 +80,9 @@ const onSubmit = () => {
         district: district.value,
         zone: zone.value,
         group: group.value,
-        vehicle: vehicle.value,
+        vehicleType: vehicleType.value,
+        vehicleColor: vehicleColor.value,
+        vehicleNumber: vehicleNumber.value,
         family: family.value,
         memo: memo.value,
         photo: photoPreview.value,
@@ -213,7 +218,7 @@ const handleDrawerModelValueUpdate = val => {
 
               <!-- 👉 생년월일 -->
               <VCol cols="12">
-                <VTextField
+                <AppDatePicker
                   v-model="birthDate"
                   label="생년월일"
                   placeholder="YYYY-MM-DD"
@@ -222,7 +227,7 @@ const handleDrawerModelValueUpdate = val => {
 
               <!-- 👉 구원일 -->
               <VCol cols="12">
-                <VTextField
+                <AppDatePicker
                   v-model="salvationDate"
                   label="구원일"
                   placeholder="YYYY-MM-DD"
@@ -256,28 +261,46 @@ const handleDrawerModelValueUpdate = val => {
 
               <!-- 👉 구역 -->
               <VCol cols="12">
-                <VTextField
+                <VSelect
                   v-model="zone"
                   label="구역"
-                  placeholder="예: 1구역"
+                  :items="['1구역', '2구역', '3구역']"
                 />
               </VCol>
 
               <!-- 👉 회 -->
               <VCol cols="12">
-                <VTextField
+                <VSelect
                   v-model="group"
                   label="회"
-                  placeholder="예: 1회"
+                  :items="['은빛장년회', '어머니회', '봉사회', '청년회']"
                 />
               </VCol>
 
-              <!-- 👉 차량 -->
+              <!-- 👉 차종 -->
               <VCol cols="12">
-                <VSelect
-                  v-model="vehicle"
-                  label="차량"
-                  :items="['있음', '없음']"
+                <VTextField
+                  v-model="vehicleType"
+                  label="차종"
+                  placeholder="예: 쏘나타"
+                />
+              </VCol>
+
+              <!-- 👉 차량색상 -->
+              <VCol cols="12">
+                <VTextField
+                  v-model="vehicleColor"
+                  label="차량색상"
+                  placeholder="예: 흰색"
+                />
+              </VCol>
+
+              <!-- 👉 차량번호 -->
+              <VCol cols="12">
+                <VTextField
+                  v-model="vehicleNumber"
+                  label="차량번호"
+                  placeholder="예: 12가 3456"
                 />
               </VCol>
 
