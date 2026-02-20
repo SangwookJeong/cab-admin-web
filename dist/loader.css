@@ -18,7 +18,14 @@ html {
 .loading-logo {
   position: absolute;
   inset-block-start: 40%;
-  inset-inline-start: calc(50% - 45px);
+  inset-inline-start: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+}
+
+.loading-logo img {
+  max-height: 44px;
+  width: auto;
 }
 
 .loading {

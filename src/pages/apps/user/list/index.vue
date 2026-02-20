@@ -2,6 +2,10 @@
 import AddNewUserDrawer from '@/views/apps/user/list/AddNewUserDrawer.vue'
 import { useUserListStore } from '@/views/apps/user/useUserListStore'
 import { avatarText } from '@core/utils/formatters'
+import { useAppAbility } from '@/plugins/casl/useAppAbility'
+
+const { can } = useAppAbility()
+const isAdmin = can('manage', 'AccountAdmin')
 
 const userListStore = useUserListStore()
 const searchQuery = ref('')
@@ -277,7 +281,10 @@ const addNewUserAndNotify = userData => {
           내보내기
         </VBtn>
 
-        <VBtn @click="isAddNewUserDrawerVisible = true">
+        <VBtn
+          v-if="isAdmin"
+          @click="isAddNewUserDrawerVisible = true"
+        >
           성도 등록
         </VBtn>
       </VCardText>

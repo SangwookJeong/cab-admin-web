@@ -307,6 +307,119 @@ mock.onGet(/\/apps\/users\/\d+/).reply(config => {
   }]
 })
 
+// ─── 성도 등록 대기 ───────────────────────────────────────────────────────────
+const pendingUsers = [
+  {
+    id: 1,
+    fullName: '홍길동',
+    phone: '010-1111-2222',
+    gender: '남',
+    birthDate: '1990-05-15',
+    salvationDate: '',
+    address1: '수원시 팔달구 인계동 100-1',
+    address2: '',
+    district: '4교구',
+    zone: '2구역',
+    group: '봉사회',
+    vehicleType: 'K3',
+    vehicleColor: '흰색',
+    vehicleNumber: '12가 1111',
+    family: [],
+    memo: '',
+    requestedAt: '2026-02-19',
+  },
+  {
+    id: 2,
+    fullName: '이지은',
+    phone: '010-2222-3333',
+    gender: '여',
+    birthDate: '1995-08-23',
+    salvationDate: '2020-04-05',
+    address1: '수원시 영통구 영통동 200-5',
+    address2: '현대아파트 302동 801호',
+    district: '2교구',
+    zone: '1구역',
+    group: '청년회',
+    vehicleType: '',
+    vehicleColor: '',
+    vehicleNumber: '',
+    family: [],
+    memo: '새신자',
+    requestedAt: '2026-02-20',
+  },
+  {
+    id: 3,
+    fullName: '박성민',
+    phone: '010-3333-4444',
+    gender: '남',
+    birthDate: '1983-12-01',
+    salvationDate: '2010-09-12',
+    address1: '수원시 장안구 조원동 55-2',
+    address2: '',
+    district: '3교구',
+    zone: '3구역',
+    group: '은빛장년회',
+    vehicleType: '모닝',
+    vehicleColor: '빨강',
+    vehicleNumber: '45나 6789',
+    family: [],
+    memo: '',
+    requestedAt: '2026-02-20',
+  },
+]
+
+mock.onGet('/apps/users/pending').reply(() => {
+  return [200, { registrations: pendingUsers }]
+})
+
+mock.onPost('/apps/users/pending').reply(config => {
+  const userData = JSON.parse(config.data)
+  const newPending = {
+    ...userData,
+    id: pendingUsers.length ? Math.max(...pendingUsers.map(u => u.id)) + 1 : 1,
+    requestedAt: new Date().toISOString().slice(0, 10),
+  }
+
+  pendingUsers.push(newPending)
+
+  return [201, { registration: newPending }]
+})
+
+mock.onPost(/\/apps\/users\/pending\/\d+\/approve/).reply(config => {
+  const match = config.url.match(/\/apps\/users\/pending\/(\d+)\/approve/)
+  const id = Number(match[1])
+  const index = pendingUsers.findIndex(u => u.id === id)
+
+  if (index === -1) return [404]
+
+  const [pendingUser] = pendingUsers.splice(index, 1)
+  const newUser = {
+    ...pendingUser,
+    id: users.length ? Math.max(...users.map(u => u.id)) + 1 : 1,
+    family: Array.isArray(pendingUser.family) ? pendingUser.family : [],
+    vehicle: pendingUser.vehicleNumber ? '있음' : '없음',
+    photo: null,
+  }
+
+  delete newUser.requestedAt
+  users.push(newUser)
+
+  return [200, { user: newUser }]
+})
+
+mock.onDelete(/\/apps\/users\/pending\/\d+/).reply(config => {
+  const id = Number(config.url?.substring(config.url.lastIndexOf('/') + 1))
+  const index = pendingUsers.findIndex(u => u.id === id)
+
+  if (index > -1) {
+    pendingUsers.splice(index, 1)
+
+    return [200]
+  }
+
+  return [404]
+})
+
 mock.onPost('/apps/users/user').reply(config => {
   const { user: userData } = JSON.parse(config.data)
   userData.id = users.length ? Math.max(...users.map(u => u.id)) + 1 : 1

@@ -9,6 +9,7 @@ export default [
     icon: { icon: 'mdi-account-outline' },
     children: [
       { title: '성도 목록', to: 'apps-user-list' },
+      { title: '등록 승인', to: 'apps-user-approval' },
     ],
   },
   {
