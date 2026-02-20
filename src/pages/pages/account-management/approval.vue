@@ -13,12 +13,45 @@ const fetchRegistrations = () => {
 
 fetchRegistrations()
 
-const approveRegistration = id => {
-  axios.post(`/auth/pending-registrations/${id}/approve`).then(() => fetchRegistrations())
+// 스낵바
+const snackbar = ref({ show: false, message: '', color: 'primary' })
+
+const showSnackbar = (message, color = 'primary') => {
+  snackbar.value = { show: true, message, color }
 }
 
-const rejectRegistration = id => {
-  axios.delete(`/auth/pending-registrations/${id}`).then(() => fetchRegistrations())
+// 거절 확인 다이얼로그
+const isRejectDialogOpen = ref(false)
+const pendingRejectId = ref(null)
+const rejectType = ref('registration') // 'registration' | 'reset'
+
+const confirmReject = (id, type) => {
+  pendingRejectId.value = id
+  rejectType.value = type
+  isRejectDialogOpen.value = true
+}
+
+const executeReject = () => {
+  if (rejectType.value === 'registration') {
+    axios.delete(`/auth/pending-registrations/${pendingRejectId.value}`).then(() => {
+      fetchRegistrations()
+      isRejectDialogOpen.value = false
+      showSnackbar('가입 신청이 거절되었습니다.')
+    })
+  } else {
+    axios.delete(`/auth/password-reset-requests/${pendingRejectId.value}`).then(() => {
+      fetchResetRequests()
+      isRejectDialogOpen.value = false
+      showSnackbar('비밀번호 재설정 요청이 거절되었습니다.')
+    })
+  }
+}
+
+const approveRegistration = id => {
+  axios.post(`/auth/pending-registrations/${id}/approve`).then(() => {
+    fetchRegistrations()
+    showSnackbar('가입이 승인되었습니다.')
+  })
 }
 
 // 👉 비밀번호 재설정 요청
@@ -51,12 +84,9 @@ const approveReset = () => {
     }).then(() => {
       isPasswordDialogOpen.value = false
       fetchResetRequests()
+      showSnackbar('비밀번호가 재설정되었습니다.')
     })
   })
-}
-
-const rejectReset = id => {
-  axios.delete(`/auth/password-reset-requests/${id}`).then(() => fetchResetRequests())
 }
 </script>
 
@@ -109,7 +139,7 @@ const rejectReset = id => {
                   color="error"
                   variant="tonal"
                   prepend-icon="mdi-close"
-                  @click="rejectRegistration(reg.id)"
+                  @click="confirmReject(reg.id, 'registration')"
                 >
                   거절
                 </VBtn>
@@ -175,7 +205,7 @@ const rejectReset = id => {
                   color="error"
                   variant="tonal"
                   prepend-icon="mdi-close"
-                  @click="rejectReset(req.id)"
+                  @click="confirmReject(req.id, 'reset')"
                 >
                   거절
                 </VBtn>
@@ -195,6 +225,41 @@ const rejectReset = id => {
         </tfoot>
       </VTable>
     </VCard>
+
+    <!-- 👉 거절 확인 다이얼로그 -->
+    <VDialog
+      v-model="isRejectDialogOpen"
+      max-width="400"
+    >
+      <VCard title="거절 확인">
+        <VCardText>
+          <template v-if="rejectType === 'registration'">
+            해당 가입 신청을 거절하시겠습니까?
+          </template>
+          <template v-else>
+            해당 비밀번호 재설정 요청을 거절하시겠습니까?
+          </template>
+          <div class="text-caption text-medium-emphasis mt-2">
+            이 작업은 되돌릴 수 없습니다.
+          </div>
+        </VCardText>
+        <VCardActions class="justify-end gap-2 pb-4 px-4">
+          <VBtn
+            variant="tonal"
+            color="secondary"
+            @click="isRejectDialogOpen = false"
+          >
+            취소
+          </VBtn>
+          <VBtn
+            color="error"
+            @click="executeReject"
+          >
+            거절
+          </VBtn>
+        </VCardActions>
+      </VCard>
+    </VDialog>
 
     <!-- 👉 새 비밀번호 설정 다이얼로그 -->
     <VDialog
@@ -235,6 +300,16 @@ const rejectReset = id => {
         </VCardActions>
       </VCard>
     </VDialog>
+
+    <!-- 👉 스낵바 -->
+    <VSnackbar
+      v-model="snackbar.show"
+      :color="snackbar.color"
+      :timeout="3000"
+      location="bottom end"
+    >
+      {{ snackbar.message }}
+    </VSnackbar>
   </div>
 </template>
 

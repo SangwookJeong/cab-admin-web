@@ -48,10 +48,13 @@ watch(selectedDistrict, () => {
 })
 
 // 👉 filter definitions
+const districtItems = Array.from({ length: 14 }, (_, i) => `${i + 1}교구`)
+const zoneItems = Array.from({ length: 5 }, (_, i) => `${i + 1}구역`)
+
 const filterDefs = computed(() => [
   { key: 'gender', label: '성별', icon: 'mdi-gender-male-female', items: ['남', '여'], disabled: false },
-  { key: 'district', label: '교구', icon: 'mdi-church', items: ['1교구', '2교구', '3교구'], disabled: false },
-  { key: 'zone', label: '구역', icon: 'mdi-account-group-outline', items: ['1구역', '2구역', '3구역'], disabled: !selectedDistrict.value },
+  { key: 'district', label: '교구', icon: 'mdi-church', items: districtItems, disabled: false },
+  { key: 'zone', label: '구역', icon: 'mdi-account-group-outline', items: zoneItems, disabled: !selectedDistrict.value },
   { key: 'group', label: '회', icon: 'mdi-account-multiple', items: ['은빛장년회', '어머니회', '봉사회', '청년회'], disabled: false },
 ])
 
@@ -113,24 +116,55 @@ const addRemoveIndividualCheckbox = checkID => {
 
 const addNewUser = userData => {
   userListStore.addUser(userData)
-
-  // refetch User
   fetchUsers()
 }
 
-const deleteUser = id => {
-  userListStore.deleteUser(id).then(() => {
-    fetchUsers()
-  })
+// 삭제 확인 다이얼로그
+const isDeleteDialogOpen = ref(false)
+const pendingDeleteId = ref(null)
+const isBulkDelete = ref(false)
+
+const confirmDelete = id => {
+  pendingDeleteId.value = id
+  isBulkDelete.value = false
+  isDeleteDialogOpen.value = true
 }
 
-const deleteSelectedUsers = () => {
-  const ids = selectedRows.value.map(checkId => Number(checkId.replace('check', '')))
+const confirmBulkDelete = () => {
+  isBulkDelete.value = true
+  isDeleteDialogOpen.value = true
+}
 
-  Promise.all(ids.map(id => userListStore.deleteUser(id))).then(() => {
-    selectedRows.value = []
-    fetchUsers()
-  })
+const executeDelete = () => {
+  if (isBulkDelete.value) {
+    const ids = selectedRows.value.map(checkId => Number(checkId.replace('check', '')))
+
+    Promise.all(ids.map(id => userListStore.deleteUser(id))).then(() => {
+      selectedRows.value = []
+      fetchUsers()
+      isDeleteDialogOpen.value = false
+      showSnackbar(`${ids.length}명의 성도가 삭제되었습니다.`)
+    })
+  } else {
+    userListStore.deleteUser(pendingDeleteId.value).then(() => {
+      fetchUsers()
+      isDeleteDialogOpen.value = false
+      showSnackbar('성도가 삭제되었습니다.')
+    })
+  }
+}
+
+// 스낵바
+const snackbar = ref({ show: false, message: '', color: 'primary' })
+
+const showSnackbar = (message, color = 'primary') => {
+  snackbar.value = { show: true, message, color }
+}
+
+const addNewUserAndNotify = userData => {
+  userListStore.addUser(userData)
+  fetchUsers()
+  showSnackbar('성도가 등록되었습니다.')
 }
 </script>
 
@@ -230,7 +264,7 @@ const deleteSelectedUsers = () => {
           variant="tonal"
           color="error"
           prepend-icon="mdi-delete-outline"
-          @click="deleteSelectedUsers"
+          @click="confirmBulkDelete"
         >
           선택 삭제 ({{ selectedRows.length }})
         </VBtn>
@@ -415,7 +449,7 @@ const deleteSelectedUsers = () => {
                       <VListItemTitle>상세보기</VListItemTitle>
                     </VListItem>
 
-                    <VListItem @click="deleteUser(user.id)">
+                    <VListItem @click="confirmDelete(user.id)">
                       <template #prepend>
                         <VIcon
                           icon="mdi-delete-outline"
@@ -484,8 +518,53 @@ const deleteSelectedUsers = () => {
     <!-- 👉 성도 등록 -->
     <AddNewUserDrawer
       v-model:isDrawerOpen="isAddNewUserDrawerVisible"
-      @user-data="addNewUser"
+      @user-data="addNewUserAndNotify"
     />
+
+    <!-- 👉 삭제 확인 다이얼로그 -->
+    <VDialog
+      v-model="isDeleteDialogOpen"
+      max-width="400"
+    >
+      <VCard title="삭제 확인">
+        <VCardText>
+          <template v-if="isBulkDelete">
+            선택한 <strong>{{ selectedRows.length }}명</strong>의 성도를 삭제하시겠습니까?
+          </template>
+          <template v-else>
+            해당 성도를 삭제하시겠습니까?
+          </template>
+          <div class="text-caption text-medium-emphasis mt-2">
+            이 작업은 되돌릴 수 없습니다.
+          </div>
+        </VCardText>
+        <VCardActions class="justify-end gap-2 pb-4 px-4">
+          <VBtn
+            variant="tonal"
+            color="secondary"
+            @click="isDeleteDialogOpen = false"
+          >
+            취소
+          </VBtn>
+          <VBtn
+            color="error"
+            @click="executeDelete"
+          >
+            삭제
+          </VBtn>
+        </VCardActions>
+      </VCard>
+    </VDialog>
+
+    <!-- 👉 스낵바 -->
+    <VSnackbar
+      v-model="snackbar.show"
+      :color="snackbar.color"
+      :timeout="3000"
+      location="bottom end"
+    >
+      {{ snackbar.message }}
+    </VSnackbar>
   </section>
 </template>
 

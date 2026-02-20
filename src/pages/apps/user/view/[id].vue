@@ -57,10 +57,18 @@ const saveEdit = () => {
 
   userData.value = { ...editForm.value, familyMembers }
   isEditing.value = false
+  showSnackbar('성도 정보가 수정되었습니다.')
 }
 
 const updatePhoto = photoData => {
   userData.value = { ...userData.value, photo: photoData }
+}
+
+// 스낵바
+const snackbar = ref({ show: false, message: '', color: 'primary' })
+
+const showSnackbar = (message, color = 'primary') => {
+  snackbar.value = { show: true, message, color }
 }
 </script>
 
@@ -331,7 +339,7 @@ const updatePhoto = photoData => {
               <VSelect
                 v-model="editForm.district"
                 label="교구"
-                :items="['1교구', '2교구', '3교구']"
+                :items="Array.from({ length: 14 }, (_, i) => `${i + 1}교구`)"
               />
             </VCol>
 
@@ -444,6 +452,15 @@ const updatePhoto = photoData => {
       </VCard>
     </VCol>
   </VRow>
+    <!-- 👉 스낵바 -->
+    <VSnackbar
+      v-model="snackbar.show"
+      :color="snackbar.color"
+      :timeout="3000"
+      location="bottom end"
+    >
+      {{ snackbar.message }}
+    </VSnackbar>
   </section>
 </template>
 

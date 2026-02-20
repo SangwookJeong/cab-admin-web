@@ -10,6 +10,7 @@ declare module '@vue/runtime-core' {
     AppBarSearch: typeof import('./src/@core/components/AppBarSearch.vue')['default']
     AppCardActions: typeof import('./src/@core/components/AppCardActions.vue')['default']
     AppCardCode: typeof import('./src/@core/components/AppCardCode.vue')['default']
+    AppDatePicker: typeof import('./src/@core/components/AppDatePicker.vue')['default']
     AppDateTimePicker: typeof import('./src/@core/components/AppDateTimePicker.vue')['default']
     AppOtpInput: typeof import('./src/@core/components/AppOtpInput.vue')['default']
     AppPricing: typeof import('./src/@core/components/AppPricing.vue')['default']
